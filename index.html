@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>21-Day Gurukul Discipline</title>
+    <title>Ultimate Discipline Tracker V2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -12,13 +12,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
         --bg-dark: #0a0a0a;
-        --bg-card: #111111;
+        --bg-card: #1a1a1a;
         --text-primary: #f0f0f0;
         --text-secondary: #888888;
         --accent: #d97706;
@@ -33,222 +33,169 @@
         --phase-night: #6366f1;
       }
 
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       body {
-        background-color: var(--bg-dark);
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
         color: var(--text-primary);
         font-family: "Inter", sans-serif;
         -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
         line-height: 1.6;
+        min-height: 100vh;
       }
 
-      .font-mono-timing {
+      .font-mono {
         font-family: "Space Mono", monospace;
       }
 
+      /* Progress Rings */
+      .progress-rings {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        margin: 0 auto;
+      }
+
+      .progress-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .progress-ring circle {
+        fill: none;
+        stroke-width: 10;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+        transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .progress-ring-bg {
+        stroke: rgba(255, 255, 255, 0.08);
+      }
+
+      .ring-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+
+      /* Checkmark */
       .checkmark {
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
         border: 2px solid var(--border);
-        border-radius: 6px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
         flex-shrink: 0;
       }
 
       .checkmark:hover {
         border-color: var(--accent);
-        transform: scale(1.05);
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
       }
 
       .checkmark.checked {
-        background-color: var(--success);
+        background: linear-gradient(135deg, var(--success), #059669);
         border-color: var(--success);
+        animation: checkPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      }
+
+      @keyframes checkPop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.3) rotate(5deg);
+        }
+        100% {
+          transform: scale(1) rotate(0);
+        }
+      }
+
+      /* Cards */
+      .card {
+        background: linear-gradient(
+          145deg,
+          rgba(26, 26, 26, 0.95),
+          rgba(35, 35, 35, 0.95)
+        );
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        border-color: rgba(217, 119, 6, 0.3);
       }
 
       .affirmation-card {
         background: linear-gradient(
           145deg,
-          rgba(30, 30, 30, 0.9),
-          rgba(40, 40, 40, 0.9)
+          rgba(26, 26, 26, 0.95),
+          rgba(35, 35, 35, 0.95)
         );
-        border-radius: 12px;
-        padding: 1.5rem;
+        border-radius: 16px;
+        padding: 2rem;
         margin-bottom: 1.5rem;
         border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s ease;
         position: relative;
         overflow: hidden;
-        transition: all 0.3s ease;
-      }
-
-      .affirmation-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       }
 
       .affirmation-card.completed {
         background: linear-gradient(
           145deg,
-          rgba(16, 185, 129, 0.1),
-          rgba(30, 30, 30, 0.9)
+          rgba(16, 185, 129, 0.15),
+          rgba(26, 26, 26, 0.95)
         );
         border-color: var(--success);
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
       }
 
-      .affirmation-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
+      .affirmation-card.active-time {
+        animation: pulseGlow 2s ease-in-out infinite;
+        border-color: currentColor;
+      }
+
+      @keyframes pulseGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 20px currentColor;
+        }
+        50% {
+          box-shadow: 0 0 40px currentColor;
+        }
+      }
+
+      /* Activity Items */
+      .activity-item {
         background: linear-gradient(
-          90deg,
-          transparent,
-          currentColor,
-          transparent
+          145deg,
+          rgba(20, 20, 20, 0.8),
+          rgba(30, 30, 30, 0.8)
         );
-        opacity: 0.5;
-      }
-
-      .affirmation-card.morning {
-        border-left: 4px solid var(--phase-morning);
-        color: var(--phase-morning);
-      }
-      .affirmation-card.afternoon {
-        border-left: 4px solid var(--phase-afternoon);
-        color: var(--phase-afternoon);
-      }
-      .affirmation-card.evening {
-        border-left: 4px solid var(--phase-evening);
-        color: var(--phase-evening);
-      }
-      .affirmation-card.night {
-        border-left: 4px solid var(--phase-night);
-        color: var(--phase-night);
-      }
-
-      .ritual-tag {
-        display: inline-block;
-        background-color: rgba(255, 255, 255, 0.1);
-        color: var(--text-primary);
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        margin-top: 0.75rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-      }
-
-      .affirmation-text {
-        font-size: 1.125rem;
-        line-height: 1.8;
-        margin-bottom: 1rem;
-        position: relative;
-        padding-left: 1.5rem;
-      }
-
-      .affirmation-text::before {
-        content: '"';
-        position: absolute;
-        left: 0;
-        top: -0.5rem;
-        font-size: 2rem;
-        color: currentColor;
-        opacity: 0.5;
-        font-family: serif;
-      }
-
-      .progress-bar {
-        height: 8px;
-        background-color: var(--border);
-        border-radius: 4px;
-        overflow: hidden;
-      }
-
-      .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--accent), var(--accent-light));
-        border-radius: 4px;
-        transition: width 0.5s ease;
-      }
-
-      .day-card {
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 10px;
-        background-color: var(--bg-card);
-        border: 2px solid var(--border);
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-      }
-
-      .day-card:hover {
-        transform: translateY(-2px);
-      }
-
-      .day-card.completed {
-        background-color: var(--success);
-        border-color: var(--success);
-        color: white;
-      }
-
-      .day-card.current {
-        border-color: var(--accent);
-        background-color: var(--accent);
-        color: white;
-        box-shadow: 0 0 20px rgba(217, 119, 6, 0.4);
-      }
-
-      .stat-card {
-        background-color: var(--bg-card);
         border: 1px solid var(--border);
         border-radius: 12px;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-      }
-
-      .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-      }
-
-      .stat-value {
-        font-size: 2.5rem;
-        font-weight: 800;
-        line-height: 1;
-        background: linear-gradient(135deg, var(--accent), var(--accent-light));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .phase-header {
-        background: linear-gradient(
-          135deg,
-          rgba(30, 30, 30, 0.9),
-          rgba(40, 40, 40, 0.9)
-        );
-        border-left: 4px solid;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        backdrop-filter: blur(10px);
-      }
-
-      .activity-item {
-        background-color: rgba(30, 30, 30, 0.5);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
         transition: all 0.3s ease;
       }
 
@@ -258,26 +205,266 @@
       }
 
       .activity-item.completed {
-        background-color: rgba(16, 185, 129, 0.08);
+        background: linear-gradient(
+          145deg,
+          rgba(16, 185, 129, 0.1),
+          rgba(20, 20, 20, 0.8)
+        );
         border-color: var(--success);
       }
 
+      .activity-item.active-time {
+        border-color: var(--accent);
+        box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
+        animation: activityPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes activityPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 15px rgba(217, 119, 6, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 25px rgba(217, 119, 6, 0.5);
+        }
+      }
+
+      /* Phase Headers */
+      .phase-header {
+        background: linear-gradient(
+          145deg,
+          rgba(30, 30, 30, 0.95),
+          rgba(40, 40, 40, 0.95)
+        );
+        border-left: 4px solid;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+      }
+
+      /* Heatmap */
+      .heatmap-day {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: var(--bg-card);
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .heatmap-day:hover {
+        transform: scale(1.15);
+        z-index: 10;
+      }
+
+      .heatmap-day.level-1 {
+        background: rgba(217, 119, 6, 0.25);
+      }
+      .heatmap-day.level-2 {
+        background: rgba(217, 119, 6, 0.5);
+      }
+      .heatmap-day.level-3 {
+        background: rgba(217, 119, 6, 0.75);
+      }
+      .heatmap-day.level-4 {
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        box-shadow: 0 0 20px rgba(217, 119, 6, 0.4);
+      }
+
+      .heatmap-day.current {
+        border-color: var(--accent);
+        border-width: 3px;
+        animation: currentPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes currentPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(217, 119, 6, 0);
+        }
+      }
+
+      /* Badges */
+      .badge-item {
+        background: linear-gradient(
+          145deg,
+          rgba(40, 40, 40, 0.5),
+          rgba(30, 30, 30, 0.5)
+        );
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .badge-item.unlocked {
+        border-color: var(--accent);
+        background: linear-gradient(
+          145deg,
+          rgba(217, 119, 6, 0.2),
+          rgba(245, 158, 11, 0.1)
+        );
+      }
+
+      .badge-item.locked {
+        opacity: 0.4;
+        filter: grayscale(1);
+      }
+
+      .badge-progress {
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+      }
+
+      .badge-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-light));
+        transition: width 0.5s ease;
+      }
+
+      /* XP System */
+      .xp-bar {
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .xp-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .xp-fill::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        animation: shimmer 2s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          left: -100%;
+        }
+        100% {
+          left: 100%;
+        }
+      }
+
+      /* Floating Action Button */
+      .fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 8px 32px rgba(217, 119, 6, 0.4);
+        transition: all 0.3s ease;
+        z-index: 100;
+      }
+
+      .fab:hover {
+        transform: scale(1.1) rotate(90deg);
+        box-shadow: 0 12px 48px rgba(217, 119, 6, 0.6);
+      }
+
+      /* Quick Actions Panel */
+      .quick-actions {
+        position: fixed;
+        bottom: 100px;
+        right: 24px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1rem;
+        min-width: 280px;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+        transform: scale(0);
+        transform-origin: bottom right;
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        z-index: 99;
+      }
+
+      .quick-actions.active {
+        transform: scale(1);
+      }
+
+      /* Confetti */
+      .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: var(--accent);
+        animation: confettiFall 3s ease-out forwards;
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* Notification */
       .notification {
         position: fixed;
         top: 24px;
         right: 24px;
         z-index: 1000;
         padding: 1rem 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
         animation: slideIn 0.3s ease forwards;
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.1);
+        max-width: 400px;
       }
 
       @keyframes slideIn {
         from {
-          transform: translateX(100%);
+          transform: translateX(120%);
           opacity: 0;
         }
         to {
@@ -286,59 +473,52 @@
         }
       }
 
-      .btn-primary {
-        background: linear-gradient(135deg, var(--accent), var(--accent-light));
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
+      /* Tabs */
+      .tab-button {
+        padding: 0.875rem 1.5rem;
+        background: transparent;
         border: none;
-        cursor: pointer;
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(217, 119, 6, 0.3);
-      }
-
-      .btn-secondary {
-        background-color: rgba(255, 255, 255, 0.05);
-        color: var(--text-primary);
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
+        color: var(--text-secondary);
         font-weight: 600;
-        transition: all 0.3s ease;
-        border: 1px solid var(--border);
         cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 10px 10px 0 0;
+        position: relative;
       }
 
-      .btn-secondary:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        transform: translateY(-2px);
+      .tab-button.active {
+        color: var(--accent);
+        background: var(--bg-card);
       }
 
-      .glow {
-        animation: glow 2s infinite alternate;
+      .tab-button.active::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 10%;
+        right: 10%;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent),
+          transparent
+        );
       }
 
-      @keyframes glow {
-        from {
-          box-shadow: 0 0 5px var(--accent);
-        }
-        to {
-          box-shadow: 0 0 20px var(--accent);
-        }
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.4s ease;
       }
 
-      .fade-in {
-        animation: fadeIn 0.5s ease forwards;
+      .tab-content.active {
+        display: block;
       }
 
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(20px);
+          transform: translateY(10px);
         }
         to {
           opacity: 1;
@@ -346,921 +526,758 @@
         }
       }
 
-      .badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
+      /* Stats */
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
-      .badge-success {
-        background-color: rgba(16, 185, 129, 0.2);
-        color: var(--success);
-      }
-
-      .badge-warning {
-        background-color: rgba(245, 158, 11, 0.2);
-        color: var(--warning);
-      }
-
-      .badge-info {
-        background-color: rgba(59, 130, 246, 0.2);
-        color: #3b82f6;
-      }
-
-      .tab-button {
-        padding: 0.75rem 1.5rem;
-        background: transparent;
-        border: none;
-        color: var(--text-secondary);
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border-radius: 8px 8px 0 0;
-        position: relative;
-      }
-
-      .tab-button.active {
-        color: var(--accent);
-        background-color: var(--bg-card);
-      }
-
-      .tab-button.active::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, var(--accent), var(--accent-light));
-        border-radius: 3px 3px 0 0;
-      }
-
-      .tab-content {
-        display: none;
-        animation: fadeIn 0.3s ease;
-      }
-
-      .tab-content.active {
-        display: block;
-      }
-
+      /* Scrollbar */
       ::-webkit-scrollbar {
         width: 10px;
       }
-
       ::-webkit-scrollbar-track {
         background: var(--bg-card);
       }
-
       ::-webkit-scrollbar-thumb {
         background: var(--border);
         border-radius: 5px;
       }
-
       ::-webkit-scrollbar-thumb:hover {
         background: var(--accent);
       }
 
-      .quote-icon {
-        font-size: 1.5rem;
-        opacity: 0.7;
-        margin-right: 0.5rem;
+      /* Responsive */
+      @media (max-width: 768px) {
+        .progress-rings {
+          width: 220px;
+          height: 220px;
+        }
+        .stat-value {
+          font-size: 2rem;
+        }
+        .heatmap-day {
+          width: 32px;
+          height: 32px;
+        }
+        .fab {
+          bottom: 80px;
+        }
+      }
+
+      /* Level Badge */
+      .level-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(
+          135deg,
+          rgba(59, 130, 246, 0.2),
+          rgba(139, 92, 246, 0.2)
+        );
+        border: 2px solid rgba(59, 130, 246, 0.5);
+        border-radius: 20px;
+        font-weight: 700;
+        animation: levelGlow 2s ease-in-out infinite;
+      }
+
+      @keyframes levelGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+      }
+
+      .collapse-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .collapse-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--accent);
+      }
+
+      .phase-activities {
+        max-height: 2000px;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+      }
+
+      .phase-activities.collapsed {
+        max-height: 0;
       }
     </style>
   </head>
-  <body class="min-h-screen">
+  <body>
     <!-- Header -->
     <header
       class="sticky top-0 z-50 bg-black/95 backdrop-blur-md border-b border-gray-800/50 shadow-xl"
     >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div class="flex flex-col md:flex-row md:items-center justify-between">
-          <div class="mb-4 md:mb-0">
-            <h1 class="text-2xl md:text-3xl font-bold tracking-tight">
+      <div class="max-w-7xl mx-auto px-4 py-3">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h1 class="text-xl md:text-2xl font-bold">
               <span
                 class="bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent"
               >
-                21-Day Discipline
+                Discipline Master V2.0
               </span>
             </h1>
-            <p class="text-gray-400 mt-1 text-sm">
-              Daily structure with phase-specific affirmations for mastery
-            </p>
           </div>
-
-          <div class="flex items-center space-x-4">
-            <div class="text-right hidden md:block">
-              <p class="text-sm text-gray-400">Current Day</p>
-              <p
-                class="text-2xl font-bold text-amber-500"
-                id="currentDayDisplay"
-              >
-                Day 1
+          <div class="flex items-center gap-3">
+            <div class="text-center">
+              <p class="text-xs text-gray-400">Time</p>
+              <p class="font-mono font-bold text-amber-500" id="liveClock">
+                00:00
               </p>
             </div>
-            <div class="h-10 w-px bg-gray-800 hidden md:block"></div>
-            <div class="text-right">
-              <p class="text-sm text-gray-400">Today's Progress</p>
-              <p class="text-2xl font-bold" id="todayProgress">0%</p>
+            <div class="hidden md:block h-8 w-px bg-gray-800"></div>
+            <div class="level-badge" id="levelDisplay">
+              <span>Lv 1</span>
+              <span class="text-xs">Beginner</span>
             </div>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Dashboard Section -->
-      <section class="mb-8 fade-in">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <!-- Left Panel - Stats -->
-          <div class="lg:col-span-2 space-y-6">
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="stat-card">
-                <div class="flex items-center justify-between mb-3">
-                  <h3 class="text-lg font-semibold">Affirmations</h3>
-                  <i class="fas fa-comment-dots text-blue-500 text-xl"></i>
-                </div>
-                <p class="stat-value" id="affirmationsCompleted">0</p>
-                <p class="text-gray-400 text-sm mt-1">Completed today</p>
-                <div class="progress-bar mt-2">
-                  <div
-                    class="progress-fill"
-                    id="affirmationsProgress"
-                    style="width: 0%"
-                  ></div>
-                </div>
-              </div>
-
-              <div class="stat-card">
-                <div class="flex items-center justify-between mb-3">
-                  <h3 class="text-lg font-semibold">Current Streak</h3>
-                  <i class="fas fa-fire text-amber-500 text-xl"></i>
-                </div>
-                <p class="stat-value" id="currentStreak">0</p>
-                <p class="text-gray-400 text-sm mt-1">Consecutive days</p>
-              </div>
-
-              <div class="stat-card">
-                <div class="flex items-center justify-between mb-3">
-                  <h3 class="text-lg font-semibold">Consistency</h3>
-                  <i class="fas fa-chart-line text-green-500 text-xl"></i>
-                </div>
-                <p class="stat-value" id="consistencyRate">0%</p>
-                <p class="text-gray-400 text-sm mt-1">Daily adherence</p>
+    <main class="max-w-7xl mx-auto px-4 py-6">
+      <!-- Dashboard -->
+      <section class="mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <!-- Progress Rings -->
+          <div class="lg:col-span-2 card">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold">
+                Day <span id="currentDayNum">1</span> Progress
+              </h3>
+              <div class="text-sm">
+                <span class="text-gray-400">XP: </span>
+                <span class="text-amber-500 font-bold" id="currentXP">0</span>
+                <span class="text-gray-400"> / </span>
+                <span id="xpNeeded">100</span>
               </div>
             </div>
-
-            <!-- 21-Day Progress -->
-            <div class="stat-card">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-semibold">21-Day Challenge Progress</h3>
-                <div class="flex items-center space-x-2">
-                  <span class="text-sm text-gray-400">Overall:</span>
-                  <span
-                    class="text-lg font-bold text-amber-500"
-                    id="overallProgress"
-                    >0%</span
-                  >
+            <div class="xp-bar mb-4">
+              <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-rings">
+              <svg class="progress-ring" width="280" height="280">
+                <circle class="progress-ring-bg" cx="140" cy="140" r="120" />
+                <circle
+                  class="progress-ring-fill"
+                  cx="140"
+                  cy="140"
+                  r="120"
+                  stroke="#3b82f6"
+                  stroke-dasharray="754"
+                  stroke-dashoffset="754"
+                  id="ring1"
+                />
+              </svg>
+              <svg class="progress-ring" width="240" height="240">
+                <circle class="progress-ring-bg" cx="120" cy="120" r="100" />
+                <circle
+                  class="progress-ring-fill"
+                  cx="120"
+                  cy="120"
+                  r="100"
+                  stroke="#10b981"
+                  stroke-dasharray="628"
+                  stroke-dashoffset="628"
+                  id="ring2"
+                />
+              </svg>
+              <svg class="progress-ring" width="200" height="200">
+                <circle class="progress-ring-bg" cx="100" cy="100" r="80" />
+                <circle
+                  class="progress-ring-fill"
+                  cx="100"
+                  cy="100"
+                  r="80"
+                  stroke="#8b5cf6"
+                  stroke-dasharray="502"
+                  stroke-dashoffset="502"
+                  id="ring3"
+                />
+              </svg>
+              <svg class="progress-ring" width="160" height="160">
+                <circle class="progress-ring-bg" cx="80" cy="80" r="60" />
+                <circle
+                  class="progress-ring-fill"
+                  cx="80"
+                  cy="80"
+                  r="60"
+                  stroke="#6366f1"
+                  stroke-dasharray="377"
+                  stroke-dashoffset="377"
+                  id="ring4"
+                />
+              </svg>
+              <div class="ring-center">
+                <div class="text-4xl md:text-5xl font-black" id="ringPercent">
+                  0%
                 </div>
+                <div class="text-gray-400 text-sm">Complete</div>
               </div>
+            </div>
+          </div>
 
-              <div
-                class="grid grid-cols-7 sm:grid-cols-10 lg:grid-cols-14 gap-2 mb-3"
-              >
-                <!-- Day cards will be populated here -->
+          <!-- Stats -->
+          <div class="space-y-4">
+            <div class="card">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-semibold">Streak</h3>
+                <i class="fas fa-fire text-amber-500 text-xl"></i>
               </div>
-
-              <div class="progress-bar">
+              <p class="stat-value" id="streakNum">0</p>
+              <p class="text-xs text-gray-400">Days consistent</p>
+            </div>
+            <div class="card">
+              <h3 class="font-semibold mb-2">Journey</h3>
+              <div class="flex justify-between text-xs text-gray-400 mb-1">
+                <span>Day 1</span>
+                <span id="progressPercent">0%</span>
+                <span>Day 21</span>
+              </div>
+              <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
                 <div
-                  class="progress-fill"
-                  id="overallProgressBar"
+                  class="h-full bg-gradient-to-r from-amber-500 to-orange-600 transition-all duration-500"
+                  id="journeyBar"
                   style="width: 0%"
                 ></div>
               </div>
-              <div class="flex justify-between text-sm text-gray-400 mt-2">
-                <span>Day 1</span>
-                <span>Day 21</span>
-              </div>
             </div>
-          </div>
-
-          <!-- Right Panel - Day Controls -->
-          <div class="space-y-6">
-            <div class="stat-card">
-              <div class="flex items-center justify-between mb-4">
-                <h2
-                  class="text-2xl font-bold text-amber-500"
-                  id="selectedDayTitle"
-                >
-                  Day 1
-                </h2>
-                <span id="dayStatusBadge" class="badge badge-info"
-                  >Not Started</span
-                >
-              </div>
-
-              <div class="space-y-5">
-                <div>
-                  <div class="flex justify-between text-sm mb-2">
-                    <span class="text-gray-400">Daily Progress</span>
-                    <span
-                      id="dayProgressPercent"
-                      class="font-bold text-amber-500"
-                      >0%</span
-                    >
-                  </div>
-                  <div class="progress-bar">
-                    <div
-                      id="dayProgressBar"
-                      class="progress-fill"
-                      style="width: 0%"
-                    ></div>
-                  </div>
-                  <p class="text-xs text-gray-500 mt-1" id="activitiesCount">
-                    0 activities completed
-                  </p>
-                </div>
-
-                <div class="space-y-2">
-                  <button
-                    onclick="markDayComplete()"
-                    class="btn-primary w-full py-3"
-                  >
-                    <i class="fas fa-check-circle mr-2"></i>
-                    Complete Today
-                  </button>
-
-                  <button
-                    onclick="resetCurrentDay()"
-                    class="btn-secondary w-full py-3"
-                  >
-                    <i class="fas fa-redo mr-2"></i>
-                    Reset Day
-                  </button>
-                </div>
-              </div>
-            </div>
+            <button
+              onclick="completeDay()"
+              class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transition-all"
+            >
+              <i class="fas fa-check-circle mr-2"></i>Complete Day
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- Tabs Navigation -->
-      <section class="mb-6 fade-in" style="animation-delay: 0.1s">
-        <div class="flex space-x-2 border-b border-gray-800">
-          <button class="tab-button active" onclick="switchTab('affirmations')">
-            <i class="fas fa-comment-dots mr-2"></i>Affirmations
-          </button>
-          <button class="tab-button" onclick="switchTab('routine')">
-            <i class="fas fa-tasks mr-2"></i>Daily Routine
-          </button>
-          <button class="tab-button" onclick="switchTab('reflection')">
-            <i class="fas fa-book mr-2"></i>Reflection
-          </button>
+      <!-- Heatmap -->
+      <section class="mb-6">
+        <div class="card">
+          <h3 class="font-bold mb-3">21-Day Heatmap</h3>
+          <div class="grid grid-cols-7 gap-2" id="heatmap"></div>
         </div>
       </section>
+
+      <!-- Tabs -->
+      <div class="flex space-x-2 border-b border-gray-800 mb-6">
+        <button class="tab-button active" onclick="switchTab('affirmations')">
+          <i class="fas fa-om mr-2"></i>Affirmations
+        </button>
+        <button class="tab-button" onclick="switchTab('routine')">
+          <i class="fas fa-tasks mr-2"></i>Routine
+        </button>
+        <button class="tab-button" onclick="switchTab('badges')">
+          <i class="fas fa-trophy mr-2"></i>Badges
+        </button>
+        <button class="tab-button" onclick="switchTab('insights')">
+          <i class="fas fa-chart-line mr-2"></i>Insights
+        </button>
+      </div>
 
       <!-- Affirmations Tab -->
-      <section
-        id="affirmations-tab"
-        class="tab-content active fade-in"
-        style="animation-delay: 0.2s"
-      >
-        <div class="mb-6">
-          <h2 class="text-2xl font-bold mb-4">Daily Affirmations by Phase</h2>
-          <p class="text-gray-400 mb-6">
-            Complete each affirmation with its ritual to activate phase energy
-          </p>
-
-          <!-- Morning Affirmation -->
-          <div class="affirmation-card morning" id="morning-affirmation">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center mb-3">
-                  <div
-                    class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mr-4"
-                  >
-                    <i class="fas fa-sun text-blue-500"></i>
-                  </div>
-                  <div>
-                    <h3 class="text-xl font-semibold text-blue-400">
-                      🌅 Morning (04:30–06:30)
-                    </h3>
-                    <p class="text-gray-400 text-sm">
-                      Saraswati / Knowledge Focus
-                    </p>
-                  </div>
-                </div>
-
-                <div class="space-y-3 mb-4">
-                  <div class="affirmation-text">
-                    "I gain clear knowledge today."
-                  </div>
-                  <div class="affirmation-text">
-                    "My mind learns fast and well."
-                  </div>
-                  <div class="affirmation-text">
-                    "I act wisely with full focus."
-                  </div>
-                </div>
-
-                <div class="ritual-tag">
-                  <i class="fas fa-hands-praying mr-1"></i>
-                  Ritual: Sit upright, breathe 3 times, repeat slowly, pause
-                  after each line.
-                </div>
-              </div>
-
-              <div
-                class="checkmark ml-4"
-                onclick="toggleAffirmation('morning')"
-              >
-                <!-- Checkmark will be added by JS -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Afternoon Affirmation -->
-          <div class="affirmation-card afternoon" id="afternoon-affirmation">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center mb-3">
-                  <div
-                    class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center mr-4"
-                  >
-                    <i class="fas fa-sun text-green-500"></i>
-                  </div>
-                  <div>
-                    <h3 class="text-xl font-semibold text-green-400">
-                      ☀️ Afternoon (09:00–17:00)
-                    </h3>
-                    <p class="text-gray-400 text-sm">Lakshmi / Wealth Focus</p>
-                  </div>
-                </div>
-
-                <div class="space-y-3 mb-4">
-                  <div class="affirmation-text">
-                    "I attract wealth through my work."
-                  </div>
-                  <div class="affirmation-text">
-                    "My efforts grow money and resources."
-                  </div>
-                  <div class="affirmation-text">
-                    "I create abundance with steady action."
-                  </div>
-                </div>
-
-                <div class="ritual-tag">
-                  <i class="fas fa-brain mr-1"></i>
-                  Ritual: Sit quietly 1 min, repeat mentally, focus on one
-                  action after reciting.
-                </div>
-              </div>
-
-              <div
-                class="checkmark ml-4"
-                onclick="toggleAffirmation('afternoon')"
-              >
-                <!-- Checkmark will be added by JS -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Evening Affirmation -->
-          <div class="affirmation-card evening" id="evening-affirmation">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center mb-3">
-                  <div
-                    class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mr-4"
-                  >
-                    <i class="fas fa-moon text-purple-500"></i>
-                  </div>
-                  <div>
-                    <h3 class="text-xl font-semibold text-purple-400">
-                      🌙 Evening (17:00–18:30)
-                    </h3>
-                    <p class="text-gray-400 text-sm">
-                      Brahma/Vishnu/Mahesh / Power Focus
-                    </p>
-                  </div>
-                </div>
-
-                <div class="space-y-3 mb-4">
-                  <div class="affirmation-text">
-                    "I stay strong and calm today."
-                  </div>
-                  <div class="affirmation-text">
-                    "I act with power and control."
-                  </div>
-                  <div class="affirmation-text">
-                    "My presence influences with wisdom."
-                  </div>
-                </div>
-
-                <div class="ritual-tag">
-                  <i class="fas fa-walking mr-1"></i>
-                  Ritual: Repeat during walking/prayer, breathe 3 times before
-                  each line, observe posture.
-                </div>
-              </div>
-
-              <div
-                class="checkmark ml-4"
-                onclick="toggleAffirmation('evening')"
-              >
-                <!-- Checkmark will be added by JS -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Night Affirmation -->
-          <div class="affirmation-card night" id="night-affirmation">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center mb-3">
-                  <div
-                    class="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center mr-4"
-                  >
-                    <i class="fas fa-bed text-indigo-500"></i>
-                  </div>
-                  <div>
-                    <h3 class="text-xl font-semibold text-indigo-400">
-                      🌑 Bedtime (21:00)
-                    </h3>
-                    <p class="text-gray-400 text-sm">Combined Focus</p>
-                  </div>
-                </div>
-
-                <div class="space-y-3 mb-4">
-                  <div class="affirmation-text">
-                    "I rest with knowledge, wealth, power."
-                  </div>
-                  <div class="affirmation-text">
-                    "Clarity, abundance, and strength grow nightly."
-                  </div>
-                  <div class="affirmation-text">
-                    "Tomorrow I act wisely and strong."
-                  </div>
-                </div>
-
-                <div class="ritual-tag">
-                  <i class="fas fa-moon mr-1"></i>
-                  Ritual: Say silently, pause after each line, sleep
-                  immediately.
-                </div>
-              </div>
-
-              <div class="checkmark ml-4" onclick="toggleAffirmation('night')">
-                <!-- Checkmark will be added by JS -->
-              </div>
-            </div>
-          </div>
-        </div>
+      <section id="affirmations-tab" class="tab-content active">
+        <div id="affirmationsContainer"></div>
       </section>
 
       <!-- Routine Tab -->
-      <section id="routine-tab" class="tab-content fade-in">
-        <div class="mb-8">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold">Daily Discipline Tracker</h2>
-            <div class="flex space-x-2">
-              <button onclick="expandAll()" class="btn-secondary text-sm">
-                <i class="fas fa-expand mr-2"></i>Expand All
-              </button>
-              <button onclick="collapseAll()" class="btn-secondary text-sm">
-                <i class="fas fa-compress mr-2"></i>Collapse All
-              </button>
+      <section id="routine-tab" class="tab-content">
+        <div class="flex justify-end gap-2 mb-4">
+          <button onclick="expandAll()" class="collapse-btn text-sm">
+            <i class="fas fa-expand mr-1"></i>Expand All
+          </button>
+          <button onclick="collapseAll()" class="collapse-btn text-sm">
+            <i class="fas fa-compress mr-1"></i>Collapse All
+          </button>
+        </div>
+        <div id="routineContainer"></div>
+      </section>
+
+      <!-- Badges Tab -->
+      <section id="badges-tab" class="tab-content">
+        <div class="card mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Achievement Badges</h3>
+            <div class="text-sm text-gray-400">
+              <span id="badgeCount">0</span>/<span id="badgeTotal">15</span>
             </div>
           </div>
-
-          <!-- Timeline -->
-          <div id="routineContainer" class="space-y-6">
-            <!-- Routine will be populated here -->
-          </div>
+          <div
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
+            id="badgeContainer"
+          ></div>
         </div>
       </section>
 
-      <!-- Reflection Tab -->
-      <section id="reflection-tab" class="tab-content fade-in">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div class="lg:col-span-2">
-            <div class="stat-card">
-              <h3 class="text-xl font-semibold mb-4">
-                Daily Reflection & Notes
-              </h3>
-              <textarea
-                id="dayNotes"
-                placeholder="Write your reflections here...\n• What did I execute today?\n• Where did I resist?\n• One correction for tomorrow\n• Insights from today's affirmations"
-                class="w-full h-64 bg-gray-900/50 border border-gray-700 rounded-lg p-4 text-gray-300 focus:outline-none focus:border-amber-500 resize-none text-sm"
-                oninput="saveNotes()"
-              ></textarea>
-              <div class="flex justify-between items-center mt-4">
-                <div class="flex space-x-2">
-                  <button onclick="clearNotes()" class="btn-secondary text-sm">
-                    Clear Notes
-                  </button>
-                  <button onclick="addTemplate()" class="btn-secondary text-sm">
-                    Use Template
-                  </button>
-                </div>
-                <span id="saveStatus" class="text-xs text-green-500 hidden">
-                  <i class="fas fa-check mr-1"></i>Auto-saved
-                </span>
-              </div>
-            </div>
+      <!-- Insights Tab -->
+      <section id="insights-tab" class="tab-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="card">
+            <h3 class="font-bold mb-3">Weekly Completion</h3>
+            <div id="weeklyChart" class="space-y-2"></div>
           </div>
-
-          <div>
-            <div class="stat-card mb-6">
-              <h3 class="text-lg font-semibold mb-4">
-                Today's Affirmation Summary
-              </h3>
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-400">Morning</span>
-                  <span id="morningStatus" class="text-red-500 text-sm">
-                    <i class="fas fa-times mr-1"></i>Pending
-                  </span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-400">Afternoon</span>
-                  <span id="afternoonStatus" class="text-red-500 text-sm">
-                    <i class="fas fa-times mr-1"></i>Pending
-                  </span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-400">Evening</span>
-                  <span id="eveningStatus" class="text-red-500 text-sm">
-                    <i class="fas fa-times mr-1"></i>Pending
-                  </span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-400">Night</span>
-                  <span id="nightStatus" class="text-red-500 text-sm">
-                    <i class="fas fa-times mr-1"></i>Pending
-                  </span>
-                </div>
-                <div class="pt-3 border-t border-gray-800">
-                  <div class="flex items-center justify-between">
-                    <span class="font-medium">Completion</span>
-                    <span
-                      id="affirmationsSummary"
-                      class="text-amber-500 font-bold"
-                      >0/4</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="phase-header border-l-amber-500">
-              <h3 class="text-xl font-semibold mb-4 text-amber-500">
-                Affirmation Guidelines
-              </h3>
-              <ul class="space-y-2 text-sm text-gray-300">
-                <li class="flex items-start">
-                  <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
-                  <span>Complete each affirmation in its time phase</span>
-                </li>
-                <li class="flex items-start">
-                  <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
-                  <span>Follow the ritual precisely</span>
-                </li>
-                <li class="flex items-start">
-                  <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
-                  <span>Visualize the outcome as you recite</span>
-                </li>
-                <li class="flex items-start">
-                  <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
-                  <span>Maintain the emotion associated with each phase</span>
-                </li>
-              </ul>
-            </div>
+          <div class="card">
+            <h3 class="font-bold mb-3">Phase Performance</h3>
+            <div id="phaseStats" class="space-y-3"></div>
           </div>
-        </div>
-      </section>
-
-      <!-- Gurukul Laws -->
-      <section class="mt-12 fade-in" style="animation-delay: 0.4s">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="phase-header border-l-amber-500">
-            <h3 class="text-xl font-semibold mb-4 text-amber-500">
-              GURUKUL LAWS (ABSOLUTE)
-            </h3>
-            <ol class="space-y-3">
-              <li class="flex items-start">
-                <span class="font-bold text-amber-500 mr-3">1.</span>
-                <span>Same routine daily</span>
-              </li>
-              <li class="flex items-start">
-                <span class="font-bold text-amber-500 mr-3">2.</span>
-                <span>No rescheduling</span>
-              </li>
-              <li class="flex items-start">
-                <span class="font-bold text-amber-500 mr-3">3.</span>
-                <span>Missed block = consequence</span>
-              </li>
-              <li class="flex items-start">
-                <span class="font-bold text-amber-500 mr-3">4.</span>
-                <span>Silence strengthens discipline</span>
-              </li>
-              <li class="flex items-start">
-                <span class="font-bold text-amber-500 mr-3">5.</span>
-                <span>Boredom = success</span>
-              </li>
-            </ol>
-          </div>
-
-          <div class="phase-header border-l-blue-500">
-            <h3 class="text-xl font-semibold mb-4 text-blue-500">
-              AFFIRMATION PRINCIPLES
-            </h3>
-            <ol class="space-y-3">
-              <li class="flex items-start">
-                <span class="font-bold text-blue-500 mr-3">1.</span>
-                <span>Morning: Clarity of mind and knowledge focus</span>
-              </li>
-              <li class="flex items-start">
-                <span class="font-bold text-blue-500 mr-3">2.</span>
-                <span>Afternoon: Action-oriented wealth creation</span>
-              </li>
-              <li class="flex items-start">
-                <span class="font-bold text-blue-500 mr-3">3.</span>
-                <span>Evening: Power and influence development</span>
-              </li>
-              <li class="flex items-start">
-                <span class="font-bold text-blue-500 mr-3">4.</span>
-                <span>Night: Integration and subconscious programming</span>
-              </li>
-            </ol>
+          <div class="card md:col-span-2">
+            <h3 class="font-bold mb-3">Daily Notes</h3>
+            <textarea
+              id="notes"
+              class="w-full h-32 bg-gray-900/50 border border-gray-700 rounded-lg p-3 text-sm resize-none focus:outline-none focus:border-amber-500"
+              placeholder="Reflections, insights, wins..."
+            ></textarea>
+            <button
+              onclick="saveNotes()"
+              class="mt-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700"
+            >
+              <i class="fas fa-save mr-2"></i>Save Notes
+            </button>
           </div>
         </div>
       </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-gray-800/50 py-8 mt-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-          <div class="mb-4 md:mb-0">
-            <p class="text-gray-400">Gurukul Discipline with Affirmations</p>
-            <p class="text-sm text-gray-500 mt-1">
-              Phase-specific affirmations for holistic development
-            </p>
-          </div>
+    <!-- Floating Action Button -->
+    <div class="fab" onclick="toggleQuickActions()">
+      <i class="fas fa-bolt"></i>
+    </div>
 
-          <div class="flex space-x-4">
-            <button
-              onclick="exportData()"
-              class="text-gray-400 hover:text-amber-500 transition flex items-center"
-            >
-              <i class="fas fa-download mr-2"></i>Export Data
-            </button>
-            <button
-              onclick="resetAll()"
-              class="text-gray-400 hover:text-red-500 transition flex items-center"
-            >
-              <i class="fas fa-trash-alt mr-2"></i>Reset All
-            </button>
-          </div>
-        </div>
+    <!-- Quick Actions Panel -->
+    <div class="quick-actions" id="quickActions">
+      <h4 class="font-bold mb-3 text-sm">Quick Actions</h4>
+      <div class="space-y-2">
+        <button
+          onclick="markCurrentPhase()"
+          class="w-full py-2 px-3 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700"
+        >
+          Complete Current Phase
+        </button>
+        <button
+          onclick="showMotivation()"
+          class="w-full py-2 px-3 bg-gray-700 text-white rounded-lg text-sm hover:bg-gray-600"
+        >
+          Need Motivation
+        </button>
+        <button
+          onclick="exportData()"
+          class="w-full py-2 px-3 bg-gray-700 text-white rounded-lg text-sm hover:bg-gray-600"
+        >
+          Export Data
+        </button>
       </div>
-    </footer>
+    </div>
 
-    <!-- Application JavaScript -->
     <script>
-      // Initialize Data
-      let challengeData = {
+      // Data Structure
+      let data = {
         currentDay: 1,
+        xp: 0,
+        level: 1,
         days: {},
-        stats: {
-          totalAffirmations: 4,
-          completedAffirmations: 0,
-          currentStreak: 0,
-          completedDays: 0,
-        },
+        badges: {},
+        collapsedPhases: [],
       };
 
-      // Activity Structure (for routine tab)
-      const activities = [
-        // Brahma Muhurta Phase
-        {
-          id: "wake",
-          time: "04:30 – 04:40",
-          title: "Wake + Mauna (Silence)",
-          phase: "brahma",
-          description:
-            "Wake instantly, no phone, no speech, sit upright, observe breath",
-        },
-        {
-          id: "prayer",
-          time: "04:40 – 05:00",
-          title: "Prayer / Mantra / Sankalpa",
-          phase: "brahma",
-          description: "Same mantra daily, no music, same spot",
-        },
-        {
-          id: "hydration",
-          time: "05:00 – 05:20",
-          title: "Hydration + Cleansing",
-          phase: "brahma",
-          description: "Drink water, oral hygiene, elimination",
-        },
-        {
-          id: "prana",
-          time: "05:20 – 05:45",
-          title: "Prāṇa + Movement",
-          phase: "brahma",
-          description:
-            "Surya Namaskar / yoga / walk, slow controlled breathing",
-        },
-        {
-          id: "coldwater",
-          time: "05:45 – 06:05",
-          title: "Cold Water Cleansing",
-          phase: "brahma",
-          description: "Face or full bath, no hot water",
-        },
-        {
-          id: "quiet",
-          time: "06:05 – 06:30",
-          title: "Quiet Sitting",
-          phase: "brahma",
-          description: "No planning, no thinking, just awareness",
-        },
+      const XP_PER_LEVEL = 100;
+      const XP_AFFIRMATION = 25;
+      const XP_ACTIVITY = 10;
 
-        // Saraswati Phase
-        {
-          id: "deepwork",
-          time: "06:30 – 08:30",
-          title: "Deep Work Block",
-          phase: "saraswati",
-          description:
-            "Technical study, active recall only, no tutorials without output",
-        },
-        {
-          id: "breakfast",
-          time: "08:30 – 09:00",
-          title: "Simple Breakfast + Walk",
-          phase: "saraswati",
-          description: "Same food daily, no screens, 10 min walk",
-        },
-
-        // Karma Yoga Phase
-        {
-          id: "technical",
-          time: "09:00 – 12:00",
-          title: "Technical Skills Block",
-          phase: "karma",
-          description: "90 min learning, 10 min stand, 80 min application",
-        },
-        {
-          id: "lunch",
-          time: "12:00 – 01:00",
-          title: "Lunch + Walk",
-          phase: "karma",
-          description: "Eat till 80%, no phone, walk silently",
-        },
-        {
-          id: "project",
-          time: "01:00 – 03:00",
-          title: "Project Development",
-          phase: "karma",
-          description: "Build, break, fix - no new theory",
-        },
-        {
-          id: "communication",
-          time: "03:00 – 05:00",
-          title: "Communication Practice",
-          phase: "karma",
-          description: "Speak aloud, record once, review once",
-        },
-
-        // Sandhya Phase
-        {
-          id: "peace",
-          time: "05:00 – 06:30",
-          title: "Free Peace Hour",
-          phase: "sandhya",
-          description: "Walk alone, sit quietly, no productivity",
-        },
-
-        // Ratri Phase
-        {
-          id: "dinner",
-          time: "06:30 – 07:15",
-          title: "Light Dinner",
-          phase: "ratri",
-          description: "Simple food, no overeating",
-        },
-        {
-          id: "reflection",
-          time: "07:15 – 07:45",
-          title: "Written Reflection",
-          phase: "ratri",
-          description:
-            "What did I execute? Where did I resist? One correction tomorrow",
-        },
-        {
-          id: "reading",
-          time: "07:45 – 08:30",
-          title: "Quiet Reading / Mantra",
-          phase: "ratri",
-          description: "Non-dopamine content, slow pace",
-        },
-        {
-          id: "shutdown",
-          time: "08:30 – 09:00",
-          title: "Shutdown Ritual",
-          phase: "ratri",
-          description: "Phone OFF, lights dim, silence, sleep by 9 PM",
-        },
-      ];
-
-      // Affirmations data
+      // Affirmations
       const affirmations = [
         {
           id: "morning",
-          title: "Morning Affirmation",
-          time: "04:30–06:30",
-          focus: "Saraswati / Knowledge",
+          title: "Morning",
+          time: "04:30-06:30",
+          focus: "Knowledge",
           statements: [
             "I gain clear knowledge today.",
             "My mind learns fast and well.",
             "I act wisely with full focus.",
           ],
-          ritual:
-            "Sit upright, breathe 3 times, repeat slowly, pause after each line.",
-          color: "#3B82F6",
+          color: "#3b82f6",
           icon: "fa-sun",
+          start: 270,
+          end: 390,
         },
         {
           id: "afternoon",
-          title: "Afternoon Affirmation",
-          time: "09:00–17:00",
-          focus: "Lakshmi / Wealth",
+          title: "Afternoon",
+          time: "09:00-17:00",
+          focus: "Wealth",
           statements: [
             "I attract wealth through my work.",
             "My efforts grow money and resources.",
             "I create abundance with steady action.",
           ],
-          ritual:
-            "Sit quietly 1 min, repeat mentally, focus on one action after reciting.",
-          color: "#10B981",
-          icon: "fa-sun",
+          color: "#10b981",
+          icon: "fa-briefcase",
+          start: 540,
+          end: 1020,
         },
         {
           id: "evening",
-          title: "Evening Affirmation",
-          time: "17:00–18:30",
-          focus: "Brahma/Vishnu/Mahesh / Power",
+          title: "Evening",
+          time: "17:00-18:30",
+          focus: "Power",
           statements: [
             "I stay strong and calm today.",
             "I act with power and control.",
             "My presence influences with wisdom.",
           ],
-          ritual:
-            "Repeat during walking/prayer, breathe 3 times before each line, observe posture.",
-          color: "#8B5CF6",
+          color: "#8b5cf6",
           icon: "fa-moon",
+          start: 1020,
+          end: 1110,
         },
         {
           id: "night",
-          title: "Night Affirmation",
+          title: "Night",
           time: "21:00",
-          focus: "Combined Focus",
+          focus: "Integration",
           statements: [
             "I rest with knowledge, wealth, power.",
             "Clarity, abundance, and strength grow nightly.",
             "Tomorrow I act wisely and strong.",
           ],
-          ritual: "Say silently, pause after each line, sleep immediately.",
-          color: "#6366F1",
+          color: "#6366f1",
+          icon: "fa-bed",
+          start: 1260,
+          end: 1439,
+        },
+      ];
+
+      // Activities
+      const activities = [
+        {
+          id: "wake",
+          title: "Wake + Silence",
+          time: "04:30-04:40",
+          phase: "brahma",
+          start: 270,
+          end: 280,
+        },
+        {
+          id: "prayer",
+          title: "Prayer/Mantra",
+          time: "04:40-05:00",
+          phase: "brahma",
+          start: 280,
+          end: 300,
+        },
+        {
+          id: "hydration",
+          title: "Hydration + Cleansing",
+          time: "05:00-05:20",
+          phase: "brahma",
+          start: 300,
+          end: 320,
+        },
+        {
+          id: "prana",
+          title: "Prāṇa + Movement",
+          time: "05:20-05:45",
+          phase: "brahma",
+          start: 320,
+          end: 345,
+        },
+        {
+          id: "coldwater",
+          title: "Cold Water Bath",
+          time: "05:45-06:05",
+          phase: "brahma",
+          start: 345,
+          end: 365,
+        },
+        {
+          id: "sitting",
+          title: "Quiet Sitting",
+          time: "06:05-06:30",
+          phase: "brahma",
+          start: 365,
+          end: 390,
+        },
+        {
+          id: "deepwork",
+          title: "Deep Work Block",
+          time: "06:30-08:30",
+          phase: "saraswati",
+          start: 390,
+          end: 510,
+        },
+        {
+          id: "breakfast",
+          title: "Breakfast + Walk",
+          time: "08:30-09:00",
+          phase: "saraswati",
+          start: 510,
+          end: 540,
+        },
+        {
+          id: "technical",
+          title: "Technical Skills",
+          time: "09:00-12:00",
+          phase: "karma",
+          start: 540,
+          end: 720,
+        },
+        {
+          id: "lunch",
+          title: "Lunch + Walk",
+          time: "12:00-13:00",
+          phase: "karma",
+          start: 720,
+          end: 780,
+        },
+        {
+          id: "project",
+          title: "Project Development",
+          time: "13:00-15:00",
+          phase: "karma",
+          start: 780,
+          end: 900,
+        },
+        {
+          id: "communication",
+          title: "Communication Practice",
+          time: "15:00-17:00",
+          phase: "karma",
+          start: 900,
+          end: 1020,
+        },
+        {
+          id: "peace",
+          title: "Free Peace Hour",
+          time: "17:00-18:30",
+          phase: "sandhya",
+          start: 1020,
+          end: 1110,
+        },
+        {
+          id: "dinner",
+          title: "Light Dinner",
+          time: "18:30-19:15",
+          phase: "ratri",
+          start: 1110,
+          end: 1155,
+        },
+        {
+          id: "reflection",
+          title: "Written Reflection",
+          time: "19:15-19:45",
+          phase: "ratri",
+          start: 1155,
+          end: 1185,
+        },
+        {
+          id: "reading",
+          title: "Quiet Reading",
+          time: "19:45-20:30",
+          phase: "ratri",
+          start: 1185,
+          end: 1230,
+        },
+        {
+          id: "shutdown",
+          title: "Shutdown Ritual",
+          time: "20:30-21:00",
+          phase: "ratri",
+          start: 1230,
+          end: 1260,
+        },
+      ];
+
+      const phases = [
+        {
+          id: "brahma",
+          title: "BRAHMA MUHURTA — Inner Command",
+          color: "#d97706",
+          icon: "fa-sun",
+        },
+        {
+          id: "saraswati",
+          title: "SARASWATI PHASE — Peak Learning",
+          color: "#10b981",
+          icon: "fa-book",
+        },
+        {
+          id: "karma",
+          title: "KARMA YOGA — Execution",
+          color: "#3b82f6",
+          icon: "fa-cogs",
+        },
+        {
+          id: "sandhya",
+          title: "SANDHYA — Peace & Transition",
+          color: "#8b5cf6",
+          icon: "fa-moon",
+        },
+        {
+          id: "ratri",
+          title: "RATRI CHARYA — Closure",
+          color: "#6366f1",
           icon: "fa-bed",
         },
       ];
 
-      // Initialize Application
+      // Badges
+      const badges = [
+        {
+          id: "first",
+          name: "First Step",
+          desc: "Complete first affirmation",
+          icon: "🌱",
+          req: () => getTotalAff() >= 1,
+        },
+        {
+          id: "morning_7",
+          name: "Morning Warrior",
+          desc: "7 morning affirmations",
+          icon: "🌅",
+          req: () => getPhaseAff("morning") >= 7,
+        },
+        {
+          id: "week_1",
+          name: "Week Champion",
+          desc: "Complete 7 days",
+          icon: "⭐",
+          req: () => getCompleteDays() >= 7,
+        },
+        {
+          id: "streak_7",
+          name: "Lucky Seven",
+          desc: "7-day streak",
+          icon: "🔥",
+          req: () => data.streak >= 7,
+        },
+        {
+          id: "perfect",
+          name: "Perfect Day",
+          desc: "100% in one day",
+          icon: "💎",
+          req: () => hasPerfectDay(),
+        },
+        {
+          id: "halfway",
+          name: "Halfway Hero",
+          desc: "Reach day 11",
+          icon: "🎯",
+          req: () => data.currentDay >= 11,
+        },
+        {
+          id: "week_2",
+          name: "Fortnight Master",
+          desc: "14 days complete",
+          icon: "🏆",
+          req: () => getCompleteDays() >= 14,
+        },
+        {
+          id: "streak_14",
+          name: "Two Weeks Strong",
+          desc: "14-day streak",
+          icon: "💪",
+          req: () => data.streak >= 14,
+        },
+        {
+          id: "level_5",
+          name: "Rising Star",
+          desc: "Reach level 5",
+          icon: "⭐",
+          req: () => data.level >= 5,
+        },
+        {
+          id: "xp_500",
+          name: "XP Hunter",
+          desc: "Earn 500 XP",
+          icon: "✨",
+          req: () => getTotalXP() >= 500,
+        },
+        {
+          id: "all_phases",
+          name: "Phase Master",
+          desc: "Complete all phases 5 times",
+          icon: "🌟",
+          req: () => allPhasesComplete(5),
+        },
+        {
+          id: "routine_50",
+          name: "Routine King",
+          desc: "50 activities done",
+          icon: "👑",
+          req: () => getTotalActivities() >= 50,
+        },
+        {
+          id: "week_3",
+          name: "Final Push",
+          desc: "Reach day 21",
+          icon: "🚀",
+          req: () => data.currentDay >= 21,
+        },
+        {
+          id: "perfect_week",
+          name: "Perfect Week",
+          desc: "7 perfect days",
+          icon: "💫",
+          req: () => hasPerfectWeek(),
+        },
+        {
+          id: "complete",
+          name: "Discipline Master",
+          desc: "Complete all 21 days",
+          icon: "🧘",
+          req: () => getCompleteDays() >= 21,
+        },
+      ];
+
+      // Quotes
+      const quotes = [
+        "Discipline is the bridge between goals and accomplishment.",
+        "We are what we repeatedly do. Excellence is a habit.",
+        "The pain of discipline is far less than the pain of regret.",
+        "Discipline is choosing between what you want now and what you want most.",
+        "Success is simple disciplines practiced every day.",
+        "Self-discipline begins with mastery of your thoughts.",
+        "Motivation gets you started. Discipline keeps you going.",
+        "Do the hard work, especially when you don't feel like it.",
+      ];
+
+      // Init
       function init() {
         loadData();
-        renderDayCards();
-        updateDisplay();
-        updateAffirmationDisplay();
-        renderRoutine();
+        updateClock();
+        renderAll();
+        setInterval(updateClock, 1000);
+        setInterval(checkActiveTime, 60000);
       }
 
-      // Load data from localStorage
       function loadData() {
-        const saved = localStorage.getItem("gurukulAffirmations");
+        const saved = localStorage.getItem("disciplineV2");
         if (saved) {
-          challengeData = JSON.parse(saved);
+          data = JSON.parse(saved);
         } else {
-          // Initialize default data
-          for (let day = 1; day <= 21; day++) {
-            challengeData.days[day] = {
-              completed: false,
+          for (let i = 1; i <= 21; i++) {
+            data.days[i] = {
               affirmations: {
                 morning: false,
                 afternoon: false,
@@ -1270,627 +1287,625 @@
               activities: {},
               notes: "",
             };
-
-            activities.forEach((activity) => {
-              challengeData.days[day].activities[activity.id] = {
-                completed: false,
-                timestamp: null,
-              };
+            activities.forEach((act) => {
+              data.days[i].activities[act.id] = false;
             });
           }
           saveData();
         }
-
-        updateStats();
+        calculateStreak();
       }
 
-      // Save data to localStorage
       function saveData() {
-        localStorage.setItem(
-          "gurukulAffirmations",
-          JSON.stringify(challengeData)
-        );
+        localStorage.setItem("disciplineV2", JSON.stringify(data));
       }
 
-      // Update statistics
-      function updateStats() {
-        let completedDays = 0;
-        let currentStreak = 0;
-        let totalAffirmationsCompleted = 0;
+      function calculateStreak() {
+        let streak = 0;
+        for (let i = data.currentDay; i >= 1; i--) {
+          const day = data.days[i];
+          const affComplete = Object.values(day.affirmations).every((a) => a);
+          if (affComplete) streak++;
+          else break;
+        }
+        data.streak = streak;
+      }
 
-        // Calculate stats
-        for (let day = 1; day <= 21; day++) {
-          const dayData = challengeData.days[day];
-          const affirmationsCompleted = Object.values(
-            dayData.affirmations
-          ).filter((a) => a).length;
-          totalAffirmationsCompleted += affirmationsCompleted;
+      function renderAll() {
+        renderHeatmap();
+        renderAffirmations();
+        renderRoutine();
+        renderBadges();
+        updateDisplay();
+        checkActiveTime();
+      }
 
-          if (dayData.completed) {
-            completedDays++;
-            // Check for streaks
-            if (day <= challengeData.currentDay) {
-              currentStreak++;
+      function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, "0");
+        const m = String(now.getMinutes()).padStart(2, "0");
+        document.getElementById("liveClock").textContent = `${h}:${m}`;
+      }
+
+      function checkActiveTime() {
+        const now = new Date();
+        const mins = now.getHours() * 60 + now.getMinutes();
+
+        affirmations.forEach((aff) => {
+          const card = document.querySelector(`#aff-${aff.id}`);
+          if (card) {
+            if (mins >= aff.start && mins <= aff.end) {
+              card.classList.add("active-time");
             } else {
-              // Reset streak if gap found
-              currentStreak = 0;
+              card.classList.remove("active-time");
             }
-          } else if (day < challengeData.currentDay) {
-            // Reset streak if day not completed
-            currentStreak = 0;
           }
-        }
+        });
 
-        challengeData.stats = {
-          totalAffirmations: 4,
-          completedAffirmations: totalAffirmationsCompleted,
-          currentStreak: currentStreak,
-          longestStreak: Math.max(
-            challengeData.stats.longestStreak || 0,
-            currentStreak
-          ),
-          completedDays: completedDays,
-        };
+        activities.forEach((act) => {
+          const item = document.querySelector(`#act-${act.id}`);
+          if (item) {
+            if (mins >= act.start && mins <= act.end) {
+              item.classList.add("active-time");
+            } else {
+              item.classList.remove("active-time");
+            }
+          }
+        });
       }
 
-      // Render day cards
-      function renderDayCards() {
-        const container = document.querySelector(".grid-cols-7");
+      function renderHeatmap() {
+        const container = document.getElementById("heatmap");
         container.innerHTML = "";
 
-        for (let day = 1; day <= 21; day++) {
-          const dayData = challengeData.days[day];
-          const isCurrent = day === challengeData.currentDay;
-          const isCompleted = dayData.completed;
-          const affirmationsCompleted = Object.values(
-            dayData.affirmations
-          ).filter((a) => a).length;
-          const progress = Math.round((affirmationsCompleted / 4) * 100);
-
-          const card = document.createElement("div");
-          card.className = `day-card ${
-            isCompleted
-              ? "completed"
-              : isCurrent
-              ? "current"
-              : progress > 0
-              ? "in-progress"
-              : ""
-          }`;
-          card.innerHTML = `
-                    ${day}
-                    ${
-                      progress > 0 && !isCompleted
-                        ? `
-                        <div class="absolute -bottom-1 left-1 right-1 h-1 bg-amber-500/30 rounded-full overflow-hidden">
-                            <div class="h-full bg-amber-500" style="width: ${progress}%"></div>
-                        </div>
-                    `
-                        : ""
-                    }
-                `;
-
-          card.onclick = () => {
-            challengeData.currentDay = day;
-            updateDisplay();
-            updateAffirmationDisplay();
-            renderRoutine();
-          };
-
-          container.appendChild(card);
-        }
-      }
-
-      // Update display
-      function updateDisplay() {
-        const day = challengeData.currentDay;
-        const dayData = challengeData.days[day];
-        const affirmationsCompleted = Object.values(
-          dayData.affirmations
-        ).filter((a) => a).length;
-        const progress = Math.round((affirmationsCompleted / 4) * 100);
-
-        // Update UI elements
-        document.getElementById("currentDayDisplay").textContent = `Day ${day}`;
-        document.getElementById("selectedDayTitle").textContent = `Day ${day}`;
-        document.getElementById("todayProgress").textContent = `${progress}%`;
-        document.getElementById(
-          "dayProgressPercent"
-        ).textContent = `${progress}%`;
-        document.getElementById("dayProgressBar").style.width = `${progress}%`;
-        document.getElementById(
-          "activitiesCount"
-        ).textContent = `${affirmationsCompleted}/4 affirmations completed`;
-
-        // Update status badge
-        const badge = document.getElementById("dayStatusBadge");
-        badge.className = "badge ";
-        if (dayData.completed) {
-          badge.classList.add("badge-success");
-          badge.textContent = "Completed";
-        } else if (progress > 0) {
-          badge.classList.add("badge-warning");
-          badge.textContent = `${progress}% Complete`;
-        } else {
-          badge.classList.add("badge-info");
-          badge.textContent = "Not Started";
-        }
-
-        // Update notes
-        document.getElementById("dayNotes").value = dayData.notes || "";
-
-        // Update stats
-        updateStats();
-
-        // Update statistics display
-        document.getElementById("affirmationsCompleted").textContent =
-          challengeData.stats.completedAffirmations;
-        document.getElementById("currentStreak").textContent =
-          challengeData.stats.currentStreak;
-        document.getElementById("consistencyRate").textContent = `${Math.round(
-          (challengeData.stats.completedDays / day) * 100
-        )}%`;
-
-        // Update progress bars
-        const affirmationsProgress = Math.round(
-          (affirmationsCompleted / 4) * 100
-        );
-        document.getElementById(
-          "affirmationsProgress"
-        ).style.width = `${affirmationsProgress}%`;
-
-        const overallProgress = Math.round(
-          (challengeData.stats.completedDays / 21) * 100
-        );
-        document.getElementById(
-          "overallProgress"
-        ).textContent = `${overallProgress}%`;
-        document.getElementById(
-          "overallProgressBar"
-        ).style.width = `${overallProgress}%`;
-
-        // Re-render day cards to update current day highlight
-        renderDayCards();
-
-        saveData();
-      }
-
-      // Update affirmation display
-      function updateAffirmationDisplay() {
-        const day = challengeData.currentDay;
-        const dayData = challengeData.days[day];
-
-        // Update each affirmation card
-        affirmations.forEach((affirmation) => {
-          const isCompleted = dayData.affirmations[affirmation.id];
-          const card = document.getElementById(`${affirmation.id}-affirmation`);
-          const checkmark = card.querySelector(".checkmark");
-
-          if (isCompleted) {
-            card.classList.add("completed");
-            checkmark.classList.add("checked");
-            checkmark.innerHTML =
-              '<i class="fas fa-check text-white text-sm"></i>';
-          } else {
-            card.classList.remove("completed");
-            checkmark.classList.remove("checked");
-            checkmark.innerHTML = "";
-          }
-        });
-
-        // Update status indicators
-        document.getElementById("morningStatus").innerHTML = dayData
-          .affirmations.morning
-          ? '<i class="fas fa-check text-green-500 mr-1"></i>Completed'
-          : '<i class="fas fa-times text-red-500 mr-1"></i>Pending';
-
-        document.getElementById("afternoonStatus").innerHTML = dayData
-          .affirmations.afternoon
-          ? '<i class="fas fa-check text-green-500 mr-1"></i>Completed'
-          : '<i class="fas fa-times text-red-500 mr-1"></i>Pending';
-
-        document.getElementById("eveningStatus").innerHTML = dayData
-          .affirmations.evening
-          ? '<i class="fas fa-check text-green-500 mr-1"></i>Completed'
-          : '<i class="fas fa-times text-red-500 mr-1"></i>Pending';
-
-        document.getElementById("nightStatus").innerHTML = dayData.affirmations
-          .night
-          ? '<i class="fas fa-check text-green-500 mr-1"></i>Completed'
-          : '<i class="fas fa-times text-red-500 mr-1"></i>Pending';
-
-        const affirmationsCompleted = Object.values(
-          dayData.affirmations
-        ).filter((a) => a).length;
-        document.getElementById(
-          "affirmationsSummary"
-        ).textContent = `${affirmationsCompleted}/4`;
-      }
-
-      // Toggle affirmation completion
-      function toggleAffirmation(affirmationId) {
-        const day = challengeData.currentDay;
-        const dayData = challengeData.days[day];
-
-        dayData.affirmations[affirmationId] =
-          !dayData.affirmations[affirmationId];
-
-        // Check if all affirmations are completed
-        const allCompleted = Object.values(dayData.affirmations).every(
-          (a) => a
-        );
-        if (allCompleted && !dayData.completed) {
-          dayData.completed = true;
-          showNotification(
-            "🎉 All affirmations completed for today!",
-            "success"
-          );
-
-          // Auto-advance to next day if not last day
-          if (day < 21) {
-            setTimeout(() => {
-              challengeData.currentDay = day + 1;
-              updateDisplay();
-              updateAffirmationDisplay();
-              renderRoutine();
-            }, 1500);
-          }
-        } else if (!allCompleted && dayData.completed) {
-          dayData.completed = false;
-        }
-
-        updateDisplay();
-        updateAffirmationDisplay();
-        showNotification(
-          `Affirmation ${
-            dayData.affirmations[affirmationId] ? "completed" : "unchecked"
-          }`,
-          "info"
-        );
-      }
-
-      // Mark day as complete
-      function markDayComplete() {
-        const day = challengeData.currentDay;
-        const dayData = challengeData.days[day];
-
-        // Mark all affirmations as complete
-        affirmations.forEach((affirmation) => {
-          dayData.affirmations[affirmation.id] = true;
-        });
-
-        dayData.completed = true;
-
-        updateDisplay();
-        updateAffirmationDisplay();
-        showNotification("✅ All affirmations marked as complete!", "success");
-
-        // Auto-advance
-        if (day < 21) {
-          setTimeout(() => {
-            challengeData.currentDay = day + 1;
-            updateDisplay();
-            updateAffirmationDisplay();
-            renderRoutine();
-          }, 2000);
-        }
-      }
-
-      // Reset current day
-      function resetCurrentDay() {
-        if (confirm("Reset all affirmations and progress for today?")) {
-          const day = challengeData.currentDay;
-          const dayData = challengeData.days[day];
-
-          // Reset all affirmations
-          affirmations.forEach((affirmation) => {
-            dayData.affirmations[affirmation.id] = false;
-          });
-
-          // Reset activities
-          activities.forEach((activity) => {
-            if (dayData.activities[activity.id]) {
-              dayData.activities[activity.id].completed = false;
-              dayData.activities[activity.id].timestamp = null;
-            }
-          });
-
-          dayData.completed = false;
-          dayData.notes = "";
-
-          updateDisplay();
-          updateAffirmationDisplay();
-          renderRoutine();
-          showNotification("Day reset successfully", "warning");
-        }
-      }
-
-      // Save notes
-      function saveNotes() {
-        const day = challengeData.currentDay;
-        challengeData.days[day].notes =
-          document.getElementById("dayNotes").value;
-        saveData();
-
-        const status = document.getElementById("saveStatus");
-        status.classList.remove("hidden");
-        setTimeout(() => status.classList.add("hidden"), 2000);
-      }
-
-      // Clear notes
-      function clearNotes() {
-        if (confirm("Clear all notes for today?")) {
-          document.getElementById("dayNotes").value = "";
-          saveNotes();
-        }
-      }
-
-      // Add template to notes
-      function addTemplate() {
-        const template = `• What did I execute today?\n• Where did I resist?\n• One correction for tomorrow\n• Insights from today's affirmations\n• How did each affirmation impact my day?\n• What energy did I bring to each phase?`;
-        document.getElementById("dayNotes").value = template;
-        saveNotes();
-      }
-
-      // Switch tabs
-      function switchTab(tabName) {
-        // Update tab buttons
-        document.querySelectorAll(".tab-button").forEach((button) => {
-          button.classList.remove("active");
-        });
-        event.target.classList.add("active");
-
-        // Update tab content
-        document.querySelectorAll(".tab-content").forEach((content) => {
-          content.classList.remove("active");
-        });
-        document.getElementById(`${tabName}-tab`).classList.add("active");
-      }
-
-      // Expand all
-      function expandAll() {
-        showNotification("All sections expanded", "info");
-      }
-
-      // Collapse all
-      function collapseAll() {
-        showNotification("All sections collapsed", "info");
-      }
-
-      // Render routine (for routine tab)
-      function renderRoutine() {
-        const container = document.getElementById("routineContainer");
-        if (!container) return;
-
-        container.innerHTML = "";
-
-        // Group activities by phase
-        const phases = [
-          {
-            id: "brahma",
-            title: "BRAHMA MUHURTA — INNER COMMAND PHASE",
-            color: "#D97706",
-            icon: "fa-sun",
-          },
-          {
-            id: "saraswati",
-            title: "SARASWATI PHASE — PEAK LEARNING",
-            color: "#10B981",
-            icon: "fa-book",
-          },
-          {
-            id: "karma",
-            title: "KARMA YOGA — EXECUTION PHASE",
-            color: "#3B82F6",
-            icon: "fa-cogs",
-          },
-          {
-            id: "sandhya",
-            title: "SANDHYA — TRANSITION & PEACE",
-            color: "#8B5CF6",
-            icon: "fa-moon",
-          },
-          {
-            id: "ratri",
-            title: "RATRI CHARYA — CLOSURE PHASE",
-            color: "#6366F1",
-            icon: "fa-bed",
-          },
-        ];
-
-        phases.forEach((phase) => {
-          const phaseActivities = activities.filter(
-            (a) => a.phase === phase.id
-          );
-          const dayData = challengeData.days[challengeData.currentDay];
-          const completedInPhase = phaseActivities.filter(
-            (a) => dayData.activities[a.id]?.completed
+        for (let i = 1; i <= 21; i++) {
+          const day = data.days[i];
+          const affDone = Object.values(day.affirmations).filter(
+            (a) => a
           ).length;
-          const phaseProgress = Math.round(
-            (completedInPhase / phaseActivities.length) * 100
-          );
+          const level = Math.floor((affDone / 4) * 4);
 
-          // Phase header
-          const phaseHTML = `
-                    <div class="phase-header" style="border-left-color: ${phase.color}">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
-                            <div class="flex items-center mb-4 sm:mb-0">
-                                <div class="w-10 h-10 rounded-lg flex items-center justify-center mr-4" style="background-color: ${phase.color}20">
-                                    <i class="fas ${phase.icon}" style="color: ${phase.color}"></i>
+          const div = document.createElement("div");
+          div.className = `heatmap-day level-${level}`;
+          if (i === data.currentDay) div.classList.add("current");
+          div.textContent = i;
+          div.onclick = () => {
+            data.currentDay = i;
+            renderAll();
+          };
+          container.appendChild(div);
+        }
+      }
+
+      function renderAffirmations() {
+        const container = document.getElementById("affirmationsContainer");
+        container.innerHTML = "";
+        const day = data.days[data.currentDay];
+
+        affirmations.forEach((aff) => {
+          const done = day.affirmations[aff.id];
+          const card = document.createElement("div");
+          card.className = "affirmation-card";
+          card.id = `aff-${aff.id}`;
+          card.style.borderLeftColor = aff.color;
+          if (done) card.classList.add("completed");
+
+          card.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: ${
+                                  aff.color
+                                }20">
+                                    <i class="fas ${
+                                      aff.icon
+                                    } text-xl" style="color: ${aff.color}"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-xl font-semibold" style="color: ${phase.color}">${phase.title}</h3>
-                                    <p class="text-gray-400 text-sm">${phaseActivities.length} activities</p>
+                                    <h3 class="text-lg font-bold" style="color: ${
+                                      aff.color
+                                    }">${aff.title} (${aff.time})</h3>
+                                    <p class="text-sm text-gray-400">${
+                                      aff.focus
+                                    } Focus</p>
                                 </div>
                             </div>
-                            <div class="flex items-center">
-                                <div class="mr-4 text-right">
-                                    <p class="text-sm text-gray-400">Progress</p>
-                                    <p class="text-lg font-bold" style="color: ${phase.color}">${phaseProgress}%</p>
-                                </div>
-                                <div class="w-32">
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${phaseProgress}%; background: ${phase.color}"></div>
-                                    </div>
-                                </div>
+                            <div class="space-y-2 mb-3 ml-2">
+                                ${aff.statements
+                                  .map(
+                                    (s) =>
+                                      `<div class="text-sm leading-relaxed">• ${s}</div>`
+                                  )
+                                  .join("")}
                             </div>
+                            <div class="text-xs text-gray-400 mt-3">+${XP_AFFIRMATION} XP</div>
                         </div>
-                        
-                        <div class="space-y-3">
+                        <div class="checkmark ${
+                          done ? "checked" : ""
+                        }" onclick="toggleAffirmation('${aff.id}')">
+                            ${
+                              done
+                                ? '<i class="fas fa-check text-white"></i>'
+                                : ""
+                            }
+                        </div>
+                    </div>
                 `;
 
-          container.innerHTML += phaseHTML;
-
-          // Activities
-          phaseActivities.forEach((activity) => {
-            const activityData = dayData.activities[activity.id];
-            const isCompleted = activityData?.completed || false;
-
-            const activityHTML = `
-                        <div class="activity-item ${
-                          isCompleted ? "completed" : ""
-                        }" id="activity-${activity.id}">
-                            <div class="flex items-start">
-                                <div class="checkmark ${
-                                  isCompleted ? "checked" : ""
-                                }" onclick="toggleActivity('${activity.id}')">
-                                    ${
-                                      isCompleted
-                                        ? '<i class="fas fa-check text-white text-sm"></i>'
-                                        : ""
-                                    }
-                                </div>
-                                <div class="ml-4 flex-1">
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
-                                        <h4 class="font-semibold text-lg">${
-                                          activity.title
-                                        }</h4>
-                                        <span class="font-mono-timing text-amber-400 bg-gray-800 px-2 py-1 rounded text-sm mt-1 sm:mt-0">
-                                            ${activity.time}
-                                        </span>
-                                    </div>
-                                    <p class="text-gray-300">${
-                                      activity.description
-                                    }</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-            container.innerHTML += activityHTML;
-          });
-
-          container.innerHTML += `</div></div>`;
+          container.appendChild(card);
         });
       }
 
-      // Toggle activity completion (for routine tab)
-      function toggleActivity(activityId) {
-        const day = challengeData.currentDay;
-        const dayData = challengeData.days[day];
+      function renderRoutine() {
+        const container = document.getElementById("routineContainer");
+        container.innerHTML = "";
+        const day = data.days[data.currentDay];
 
-        if (!dayData.activities[activityId]) {
-          dayData.activities[activityId] = {
-            completed: false,
-            timestamp: null,
-          };
+        phases.forEach((phase) => {
+          const phaseActs = activities.filter((a) => a.phase === phase.id);
+          const done = phaseActs.filter((a) => day.activities[a.id]).length;
+          const total = phaseActs.length;
+          const pct = Math.round((done / total) * 100);
+          const isCollapsed = data.collapsedPhases.includes(phase.id);
+
+          const phaseDiv = document.createElement("div");
+          phaseDiv.className = "phase-header";
+          phaseDiv.style.borderLeftColor = phase.color;
+
+          phaseDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-3 cursor-pointer" onclick="togglePhase('${
+                      phase.id
+                    }')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: ${
+                              phase.color
+                            }20">
+                                <i class="fas ${phase.icon}" style="color: ${
+            phase.color
+          }"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold" style="color: ${
+                                  phase.color
+                                }">${phase.title}</h3>
+                                <p class="text-xs text-gray-400">${done}/${total} activities</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <p class="text-sm font-bold" style="color: ${
+                                  phase.color
+                                }">${pct}%</p>
+                            </div>
+                            <i class="fas fa-chevron-${
+                              isCollapsed ? "down" : "up"
+                            } text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="phase-activities ${
+                      isCollapsed ? "collapsed" : ""
+                    }" id="phase-${phase.id}">
+                        ${phaseActs
+                          .map((act) => {
+                            const actDone = day.activities[act.id];
+                            return `
+                                <div class="activity-item ${
+                                  actDone ? "completed" : ""
+                                }" id="act-${act.id}">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3 flex-1">
+                                            <div class="checkmark ${
+                                              actDone ? "checked" : ""
+                                            }" onclick="toggleActivity('${
+                              act.id
+                            }')">
+                                                ${
+                                                  actDone
+                                                    ? '<i class="fas fa-check text-white text-sm"></i>'
+                                                    : ""
+                                                }
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between">
+                                                    <h4 class="font-semibold text-sm">${
+                                                      act.title
+                                                    }</h4>
+                                                    <span class="font-mono text-xs text-amber-400">${
+                                                      act.time
+                                                    }</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                          })
+                          .join("")}
+                    </div>
+                `;
+
+          container.appendChild(phaseDiv);
+        });
+      }
+
+      function renderBadges() {
+        const container = document.getElementById("badgeContainer");
+        container.innerHTML = "";
+        let unlocked = 0;
+
+        badges.forEach((badge) => {
+          const isUnlocked = badge.req();
+          if (isUnlocked) {
+            unlocked++;
+            if (!data.badges[badge.id]) {
+              data.badges[badge.id] = true;
+              showNotification(`🏆 Badge Unlocked: ${badge.name}!`, "success");
+              saveData();
+            }
+          }
+
+          const div = document.createElement("div");
+          div.className = `badge-item ${isUnlocked ? "unlocked" : "locked"}`;
+          div.innerHTML = `
+                    <div class="text-4xl mb-2">${badge.icon}</div>
+                    <div class="text-xs font-bold">${badge.name}</div>
+                    <div class="text-xs text-gray-400 mt-1">${badge.desc}</div>
+                `;
+          container.appendChild(div);
+        });
+
+        document.getElementById("badgeCount").textContent = unlocked;
+        document.getElementById("badgeTotal").textContent = badges.length;
+      }
+
+      function updateDisplay() {
+        const day = data.days[data.currentDay];
+        const affDone = Object.values(day.affirmations).filter((a) => a).length;
+        const pct = Math.round((affDone / 4) * 100);
+
+        // Rings
+        const circumferences = [754, 628, 502, 377];
+        const rings = ["ring1", "ring2", "ring3", "ring4"];
+        const affKeys = ["morning", "afternoon", "evening", "night"];
+
+        rings.forEach((ringId, i) => {
+          const ring = document.getElementById(ringId);
+          const done = day.affirmations[affKeys[i]];
+          ring.style.strokeDashoffset = done ? 0 : circumferences[i];
+        });
+
+        document.getElementById("ringPercent").textContent = `${pct}%`;
+        document.getElementById("currentDayNum").textContent = data.currentDay;
+        document.getElementById("streakNum").textContent = data.streak;
+
+        const journeyPct = Math.round(((data.currentDay - 1) / 20) * 100);
+        document.getElementById(
+          "progressPercent"
+        ).textContent = `${journeyPct}%`;
+        document.getElementById("journeyBar").style.width = `${journeyPct}%`;
+
+        // XP & Level
+        const level = Math.floor(data.xp / XP_PER_LEVEL) + 1;
+        data.level = level;
+        const xpInLevel = data.xp % XP_PER_LEVEL;
+        const xpPct = (xpInLevel / XP_PER_LEVEL) * 100;
+
+        document.getElementById("currentXP").textContent = xpInLevel;
+        document.getElementById("xpNeeded").textContent = XP_PER_LEVEL;
+        document.getElementById("xpFill").style.width = `${xpPct}%`;
+
+        const levelNames = [
+          "Beginner",
+          "Apprentice",
+          "Practitioner",
+          "Adept",
+          "Master",
+          "Guru",
+        ];
+        const levelName =
+          levelNames[Math.min(level - 1, levelNames.length - 1)];
+        document.getElementById(
+          "levelDisplay"
+        ).innerHTML = `<span>Lv ${level}</span><span class="text-xs">${levelName}</span>`;
+
+        // Insights
+        renderInsights();
+
+        // Load notes
+        document.getElementById("notes").value = day.notes || "";
+      }
+
+      function renderInsights() {
+        // Weekly chart
+        const weeklyDiv = document.getElementById("weeklyChart");
+        if (weeklyDiv) {
+          weeklyDiv.innerHTML = "";
+          for (
+            let i = Math.max(1, data.currentDay - 6);
+            i <= data.currentDay;
+            i++
+          ) {
+            const day = data.days[i];
+            const affDone = Object.values(day.affirmations).filter(
+              (a) => a
+            ).length;
+            const pct = (affDone / 4) * 100;
+
+            const bar = document.createElement("div");
+            bar.className = "flex items-center gap-2";
+            bar.innerHTML = `
+                        <div class="text-xs w-12 text-gray-400">Day ${i}</div>
+                        <div class="flex-1 h-6 bg-gray-800 rounded overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-amber-500 to-orange-600" style="width: ${pct}%"></div>
+                        </div>
+                        <div class="text-xs w-12 text-right font-bold text-amber-500">${Math.round(
+                          pct
+                        )}%</div>
+                    `;
+            weeklyDiv.appendChild(bar);
+          }
         }
 
-        dayData.activities[activityId].completed =
-          !dayData.activities[activityId].completed;
-        dayData.activities[activityId].timestamp = dayData.activities[
-          activityId
-        ].completed
-          ? new Date().toISOString()
-          : null;
+        // Phase stats
+        const phaseDiv = document.getElementById("phaseStats");
+        if (phaseDiv) {
+          phaseDiv.innerHTML = "";
+          affirmations.forEach((aff) => {
+            const total = getPhaseAff(aff.id);
+            const pct = Math.round((total / data.currentDay) * 100);
+
+            const stat = document.createElement("div");
+            stat.innerHTML = `
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm">${aff.title}</span>
+                            <span class="text-xs font-bold" style="color: ${aff.color}">${total}/${data.currentDay}</span>
+                        </div>
+                        <div class="h-2 bg-gray-800 rounded overflow-hidden">
+                            <div class="h-full" style="width: ${pct}%; background: ${aff.color}"></div>
+                        </div>
+                    `;
+            phaseDiv.appendChild(stat);
+          });
+        }
+      }
+
+      function toggleAffirmation(id) {
+        const day = data.days[data.currentDay];
+        day.affirmations[id] = !day.affirmations[id];
+
+        if (day.affirmations[id]) {
+          data.xp += XP_AFFIRMATION;
+          confetti();
+          playSound();
+        } else {
+          data.xp = Math.max(0, data.xp - XP_AFFIRMATION);
+        }
+
+        calculateStreak();
+        saveData();
+        renderAll();
+      }
+
+      function toggleActivity(id) {
+        const day = data.days[data.currentDay];
+        day.activities[id] = !day.activities[id];
+
+        if (day.activities[id]) {
+          data.xp += XP_ACTIVITY;
+        } else {
+          data.xp = Math.max(0, data.xp - XP_ACTIVITY);
+        }
 
         saveData();
-        renderRoutine();
-        showNotification(
-          `Activity ${
-            dayData.activities[activityId].completed ? "completed" : "unchecked"
-          }`,
-          "info"
+        renderAll();
+      }
+
+      function completeDay() {
+        const day = data.days[data.currentDay];
+        Object.keys(day.affirmations).forEach(
+          (k) => (day.affirmations[k] = true)
         );
-      }
+        Object.keys(day.activities).forEach((k) => (day.activities[k] = true));
+        data.xp += XP_AFFIRMATION * 4 + XP_ACTIVITY * activities.length;
 
-      // Export data
-      function exportData() {
-        const dataStr = JSON.stringify(challengeData, null, 2);
-        const dataUri =
-          "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-
-        const link = document.createElement("a");
-        link.setAttribute("href", dataUri);
-        link.setAttribute(
-          "download",
-          `gurukul-affirmations-${new Date().toISOString().split("T")[0]}.json`
-        );
-        link.click();
-
-        showNotification("Data exported successfully", "success");
-      }
-
-      // Reset all data
-      function resetAll() {
-        if (confirm("Reset ALL progress? This cannot be undone.")) {
-          localStorage.removeItem("gurukulAffirmations");
-          challengeData = {
-            currentDay: 1,
-            days: {},
-            stats: {
-              totalAffirmations: 4,
-              completedAffirmations: 0,
-              currentStreak: 0,
-              completedDays: 0,
-            },
-          };
-          init();
-          showNotification("All data reset", "warning");
-        }
-      }
-
-      // Show notification
-      function showNotification(message, type = "info") {
-        const notification = document.createElement("div");
-        notification.className = "notification";
-
-        let bgColor = "bg-gray-800";
-        let borderColor = "border-gray-600";
-
-        if (type === "success") {
-          bgColor = "bg-green-900/20";
-          borderColor = "border-green-500";
-        } else if (type === "warning") {
-          bgColor = "bg-amber-900/20";
-          borderColor = "border-amber-500";
-        } else if (type === "danger") {
-          bgColor = "bg-red-900/20";
-          borderColor = "border-red-500";
-        }
-
-        notification.className = `notification ${bgColor} border-l-4 ${borderColor}`;
-        notification.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas ${
-                      type === "success"
-                        ? "fa-check-circle"
-                        : type === "warning"
-                        ? "fa-exclamation-triangle"
-                        : type === "danger"
-                        ? "fa-times-circle"
-                        : "fa-info-circle"
-                    } mr-3 text-lg"></i>
-                    <span>${message}</span>
-                </div>
-            `;
-
-        document.body.appendChild(notification);
+        saveData();
+        calculateStreak();
+        majorCelebration();
+        showNotification("🎉 Day completed! Amazing work!", "success");
 
         setTimeout(() => {
-          notification.style.animation = "slideIn 0.3s ease reverse forwards";
-          setTimeout(() => notification.remove(), 300);
-        }, 3000);
+          if (data.currentDay < 21) {
+            data.currentDay++;
+            saveData();
+            renderAll();
+          }
+        }, 2000);
+      }
+
+      function togglePhase(id) {
+        const idx = data.collapsedPhases.indexOf(id);
+        if (idx > -1) {
+          data.collapsedPhases.splice(idx, 1);
+        } else {
+          data.collapsedPhases.push(id);
+        }
+        saveData();
+        renderRoutine();
+      }
+
+      function expandAll() {
+        data.collapsedPhases = [];
+        saveData();
+        renderRoutine();
+      }
+
+      function collapseAll() {
+        data.collapsedPhases = phases.map((p) => p.id);
+        saveData();
+        renderRoutine();
+      }
+
+      function saveNotes() {
+        const notes = document.getElementById("notes").value;
+        data.days[data.currentDay].notes = notes;
+        saveData();
+        showNotification("✅ Notes saved", "success");
+      }
+
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab-button")
+          .forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => c.classList.remove("active"));
+        document.getElementById(`${tab}-tab`).classList.add("active");
+      }
+
+      function toggleQuickActions() {
+        document.getElementById("quickActions").classList.toggle("active");
+      }
+
+      function markCurrentPhase() {
+        const now = new Date();
+        const mins = now.getHours() * 60 + now.getMinutes();
+        const aff = affirmations.find((a) => mins >= a.start && mins <= a.end);
+        if (aff) {
+          toggleAffirmation(aff.id);
+          showNotification(`✅ ${aff.title} phase marked complete!`, "success");
+        } else {
+          showNotification("⏰ No active phase right now", "info");
+        }
+        toggleQuickActions();
+      }
+
+      function showMotivation() {
+        const quote = quotes[Math.floor(Math.random() * quotes.length)];
+        showNotification(`💪 ${quote}`, "info");
+        toggleQuickActions();
+      }
+
+      function exportData() {
+        const dataStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `discipline-data-${
+          new Date().toISOString().split("T")[0]
+        }.json`;
+        a.click();
+        showNotification("📥 Data exported!", "success");
+        toggleQuickActions();
+      }
+
+      function confetti() {
+        for (let i = 0; i < 30; i++) {
+          const c = document.createElement("div");
+          c.className = "confetti";
+          c.style.left = Math.random() * 100 + "vw";
+          c.style.animationDelay = Math.random() * 0.5 + "s";
+          c.style.background = [
+            "#d97706",
+            "#f59e0b",
+            "#10b981",
+            "#3b82f6",
+            "#8b5cf6",
+          ][Math.floor(Math.random() * 5)];
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 3000);
+        }
+      }
+
+      function majorCelebration() {
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => confetti(), i * 200);
+        }
+      }
+
+      function playSound() {
+        // Could add actual audio
+      }
+
+      function showNotification(msg, type) {
+        const notif = document.createElement("div");
+        notif.className = "notification";
+        const colors = {
+          success: "bg-green-900/30 border-green-500",
+          info: "bg-blue-900/30 border-blue-500",
+          warning: "bg-amber-900/30 border-amber-500",
+        };
+        notif.className += " " + colors[type] + " border-l-4";
+        notif.innerHTML = `<div class="flex items-center"><i class="fas fa-info-circle mr-3"></i><span>${msg}</span></div>`;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 4000);
+      }
+
+      // Helper functions
+      function getTotalAff() {
+        let total = 0;
+        for (let i = 1; i <= 21; i++) {
+          total += Object.values(data.days[i].affirmations).filter(
+            (a) => a
+          ).length;
+        }
+        return total;
+      }
+
+      function getPhaseAff(phase) {
+        let total = 0;
+        for (let i = 1; i <= 21; i++) {
+          if (data.days[i].affirmations[phase]) total++;
+        }
+        return total;
+      }
+
+      function getCompleteDays() {
+        let total = 0;
+        for (let i = 1; i <= 21; i++) {
+          if (Object.values(data.days[i].affirmations).every((a) => a)) total++;
+        }
+        return total;
+      }
+
+      function hasPerfectDay() {
+        for (let i = 1; i <= 21; i++) {
+          if (Object.values(data.days[i].affirmations).every((a) => a))
+            return true;
+        }
+        return false;
+      }
+
+      function hasPerfectWeek() {
+        let count = 0;
+        for (let i = 1; i <= 21; i++) {
+          if (Object.values(data.days[i].affirmations).every((a) => a)) {
+            count++;
+            if (count >= 7) return true;
+          } else {
+            count = 0;
+          }
+        }
+        return false;
+      }
+
+      function getTotalXP() {
+        return data.xp;
+      }
+
+      function getTotalActivities() {
+        let total = 0;
+        for (let i = 1; i <= 21; i++) {
+          total += Object.values(data.days[i].activities).filter(
+            (a) => a
+          ).length;
+        }
+        return total;
+      }
+
+      function allPhasesComplete(n) {
+        return affirmations.every((aff) => getPhaseAff(aff.id) >= n);
       }
 
       // Initialize on load
