@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ultimate Discipline Tracker V2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-dark: #0a0a0a;
+        --bg-card: #1a1a1a;
+        --text-primary: #f0f0f0;
+        --text-secondary: #888888;
+        --accent: #d97706;
+        --accent-light: #f59e0b;
+        --border: #333333;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --phase-morning: #3b82f6;
+        --phase-afternoon: #10b981;
+        --phase-evening: #8b5cf6;
+        --phase-night: #6366f1;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        color: var(--text-primary);
+        font-family: "Inter", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .font-mono {
+        font-family: "Space Mono", monospace;
+      }
+
+      /* Progress Rings */
+      .progress-rings {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        margin: 0 auto;
+      }
+
+      .progress-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .progress-ring circle {
+        fill: none;
+        stroke-width: 10;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+        transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .progress-ring-bg {
+        stroke: rgba(255, 255, 255, 0.08);
+      }
+
+      .ring-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+
+      /* Checkmark */
+      .checkmark {
+        width: 32px;
+        height: 32px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+      }
+
+      .checkmark:hover {
+        border-color: var(--accent);
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
+      }
+
+      .checkmark.checked {
+        background: linear-gradient(135deg, var(--success), #059669);
+        border-color: var(--success);
+        animation: checkPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      }
+
+      @keyframes checkPop {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.3) rotate(5deg);
+        }
+        100% {
+          transform: scale(1) rotate(0);
+        }
+      }
+
+      /* Cards */
+      .card {
+        background: linear-gradient(
+          145deg,
+          rgba(26, 26, 26, 0.95),
+          rgba(35, 35, 35, 0.95)
+        );
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        border-color: rgba(217, 119, 6, 0.3);
+      }
+
+      .affirmation-card {
+        background: linear-gradient(
+          145deg,
+          rgba(26, 26, 26, 0.95),
+          rgba(35, 35, 35, 0.95)
+        );
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .affirmation-card.completed {
+        background: linear-gradient(
+          145deg,
+          rgba(16, 185, 129, 0.15),
+          rgba(26, 26, 26, 0.95)
+        );
+        border-color: var(--success);
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+      }
+
+      .affirmation-card.active-time {
+        animation: pulseGlow 2s ease-in-out infinite;
+        border-color: currentColor;
+      }
+
+      @keyframes pulseGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 20px currentColor;
+        }
+        50% {
+          box-shadow: 0 0 40px currentColor;
+        }
+      }
+
+      /* Activity Items */
+      .activity-item {
+        background: linear-gradient(
+          145deg,
+          rgba(20, 20, 20, 0.8),
+          rgba(30, 30, 30, 0.8)
+        );
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+      }
+
+      .activity-item:hover {
+        border-color: var(--accent);
+        transform: translateX(5px);
+      }
+
+      .activity-item.completed {
+        background: linear-gradient(
+          145deg,
+          rgba(16, 185, 129, 0.1),
+          rgba(20, 20, 20, 0.8)
+        );
+        border-color: var(--success);
+      }
+
+      .activity-item.active-time {
+        border-color: var(--accent);
+        box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
+        animation: activityPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes activityPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 15px rgba(217, 119, 6, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 25px rgba(217, 119, 6, 0.5);
+        }
+      }
+
+      /* Phase Headers */
+      .phase-header {
+        background: linear-gradient(
+          145deg,
+          rgba(30, 30, 30, 0.95),
+          rgba(40, 40, 40, 0.95)
+        );
+        border-left: 4px solid;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+      }
+
+      /* Heatmap */
+      .heatmap-day {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: var(--bg-card);
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .heatmap-day:hover {
+        transform: scale(1.15);
+        z-index: 10;
+      }
+
+      .heatmap-day.level-1 {
+        background: rgba(217, 119, 6, 0.25);
+      }
+      .heatmap-day.level-2 {
+        background: rgba(217, 119, 6, 0.5);
+      }
+      .heatmap-day.level-3 {
+        background: rgba(217, 119, 6, 0.75);
+      }
+      .heatmap-day.level-4 {
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        box-shadow: 0 0 20px rgba(217, 119, 6, 0.4);
+      }
+
+      .heatmap-day.current {
+        border-color: var(--accent);
+        border-width: 3px;
+        animation: currentPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes currentPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(217, 119, 6, 0);
+        }
+      }
+
+      /* Badges */
+      .badge-item {
+        background: linear-gradient(
+          145deg,
+          rgba(40, 40, 40, 0.5),
+          rgba(30, 30, 30, 0.5)
+        );
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .badge-item.unlocked {
+        border-color: var(--accent);
+        background: linear-gradient(
+          145deg,
+          rgba(217, 119, 6, 0.2),
+          rgba(245, 158, 11, 0.1)
+        );
+      }
+
+      .badge-item.locked {
+        opacity: 0.4;
+        filter: grayscale(1);
+      }
+
+      .badge-progress {
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+      }
+
+      .badge-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-light));
+        transition: width 0.5s ease;
+      }
+
+      /* XP System */
+      .xp-bar {
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .xp-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .xp-fill::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        animation: shimmer 2s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          left: -100%;
+        }
+        100% {
+          left: 100%;
+        }
+      }
+
+      /* Floating Action Button */
+      .fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 8px 32px rgba(217, 119, 6, 0.4);
+        transition: all 0.3s ease;
+        z-index: 100;
+      }
+
+      .fab:hover {
+        transform: scale(1.1) rotate(90deg);
+        box-shadow: 0 12px 48px rgba(217, 119, 6, 0.6);
+      }
+
+      /* Quick Actions Panel */
+      .quick-actions {
+        position: fixed;
+        bottom: 100px;
+        right: 24px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1rem;
+        min-width: 280px;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+        transform: scale(0);
+        transform-origin: bottom right;
+        transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        z-index: 99;
+      }
+
+      .quick-actions.active {
+        transform: scale(1);
+      }
+
+      /* Confetti */
+      .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: var(--accent);
+        animation: confettiFall 3s ease-out forwards;
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* Notification */
+      .notification {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 1000;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+        animation: slideIn 0.3s ease forwards;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        max-width: 400px;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(120%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Tabs */
+      .tab-button {
+        padding: 0.875rem 1.5rem;
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 10px 10px 0 0;
+        position: relative;
+      }
+
+      .tab-button.active {
+        color: var(--accent);
+        background: var(--bg-card);
+      }
+
+      .tab-button.active::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 10%;
+        right: 10%;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent),
+          transparent
+        );
+      }
+
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.4s ease;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Stats */
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg-card);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 5px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .progress-rings {
+          width: 220px;
+          height: 220px;
+        }
+        .stat-value {
+          font-size: 2rem;
+        }
+        .heatmap-day {
+          width: 32px;
+          height: 32px;
+        }
+        .fab {
+          bottom: 80px;
+        }
+      }
+
+      /* Level Badge */
+      .level-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(
+          135deg,
+          rgba(59, 130, 246, 0.2),
+          rgba(139, 92, 246, 0.2)
+        );
+        border: 2px solid rgba(59, 130, 246, 0.5);
+        border-radius: 20px;
+        font-weight: 700;
+        animation: levelGlow 2s ease-in-out infinite;
+      }
+
+      @keyframes levelGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+      }
+
+      .collapse-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .collapse-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--accent);
+      }
+
+      .phase-activities {
+        max-height: 2000px;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+      }
+
+      .phase-activities.collapsed {
+        max-height: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header
+      class="sticky top-0 z-50 bg-black/95 backdrop-blur-md border-b border-gray-800/50 shadow-xl"
+    >
+      <div class="max-w-7xl mx-auto px-4 py-3">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h1 class="text-xl md:text-2xl font-bold">
+              <span
+                class="bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent"
+              >
+                Discipline Master V2.0
+              </span>
+            </h1>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-center">
+              <p class="text-xs text-gray-400">Time</p>
+              <p class="font-mono font-bold text-amber-500" id="liveClock">
+                00:00
+              </p>
+            </div>
+            <div class="hidden md:block h-8 w-px bg-gray-800"></div>
+            <div class="level-badge" id="levelDisplay">
+              <span>Lv 1</span>
+              <span class="text-xs">Beginner</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+      <!-- Dashboard -->
+      <section class="mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <!-- Progress Rings -->
+          <div class="lg:col-span-2 card">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold">
+                Day <span id="currentDayNum">1</span> Progress
+              </h3>
+              <div class="text-sm">
+                <span class="text-gray-400">XP: </span>
+                <span class="text-amber-500 font-bold" id="currentXP">0</span>
+                <span class="text-gray-400"> / </span>
+                <span id="xpNeeded">100</span>
+              </div>
+            </div>
+            <div class="xp-bar mb-4">
+              <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-rings">
+              <svg class="progress-ring" width="280" height="280">
+                <circle class="progress-ring-bg" cx="140" cy="140" r="120" />
+                <circle
+                  class="progress-ring-fill"
+                  cx="140"
+                  cy="140"
+                  r="120"
+                  stroke="#3b82f6"
+                  stroke-dasharray="754"
+                  stroke-dashoffset="754"
+                  id="ring1"
+                />
+              </svg>
+              <svg class="progress-ring" width="240" height="240">
+                <circle class="progress-ring-bg" cx="120" cy="120" r="100" />
+                <circle
+                  class="progress-ring-fill"
+                  cx="120"
+                  cy="120"
+                  r="100"
+                  stroke="#10b981"
+                  stroke-dasharray="628"
+                  stroke-dashoffset="628"
+                  id="ring2"
+                />
+              </svg>
+              <svg class="progress-ring" width="200" height="200">
+                <circle class="progress-ring-bg" cx="100" cy="100" r="80" />
+                <circle
+                  class="progress-ring-fill"
+                  cx="100"
+                  cy="100"
+                  r="80"
+                  stroke="#8b5cf6"
+                  stroke-dasharray="502"
+                  stroke-dashoffset="502"
+                  id="ring3"
+                />
+              </svg>
+              <svg class="progress-ring" width="160" height="160">
+                <circle class="progress-ring-bg" cx="80" cy="80" r="60" />
+                <circle
+                  class="progress-ring-fill"
+                  cx="80"
+                  cy="80"
+                  r="60"
+                  stroke="#6366f1"
+                  stroke-dasharray="377"
+                  stroke-dashoffset="377"
+                  id="ring4"
+                />
+              </svg>
+              <div class="ring-center">
+                <div class="text-4xl md:text-5xl font-black" id="ringPercent">
+                  0%
+                </div>
+                <div class="text-gray-400 text-sm">Complete</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="space-y-4">
+            <div class="card">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-semibold">Streak</h3>
+                <i class="fas fa-fire text-amber-500 text-xl"></i>
+              </div>
+              <p class="stat-value" id="streakNum">0</p>
+              <p class="text-xs text-gray-400">Days consistent</p>
+            </div>
+            <div class="card">
+              <h3 class="font-semibold mb-2">Journey</h3>
+              <div class="flex justify-between text-xs text-gray-400 mb-1">
+                <span>Day 1</span>
+                <span id="progressPercent">0%</span>
+                <span>Day 21</span>
+              </div>
+              <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-gradient-to-r from-amber-500 to-orange-600 transition-all duration-500"
+                  id="journeyBar"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+            <button
+              onclick="completeDay()"
+              class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transition-all"
+            >
+              <i class="fas fa-check-circle mr-2"></i>Complete Day
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Heatmap -->
+      <section class="mb-6">
+        <div class="card">
+          <h3 class="font-bold mb-3">21-Day Heatmap</h3>
+          <div class="grid grid-cols-7 gap-2" id="heatmap"></div>
+        </div>
+      </section>
+
+      <!-- Tabs -->
+      <div class="flex space-x-2 border-b border-gray-800 mb-6">
+        <button class="tab-button active" onclick="switchTab('affirmations')">
+          <i class="fas fa-om mr-2"></i>Affirmations
+        </button>
+        <button class="tab-button" onclick="switchTab('routine')">
+          <i class="fas fa-tasks mr-2"></i>Routine
+        </button>
+        <button class="tab-button" onclick="switchTab('badges')">
+          <i class="fas fa-trophy mr-2"></i>Badges
+        </button>
+        <button class="tab-button" onclick="switchTab('insights')">
+          <i class="fas fa-chart-line mr-2"></i>Insights
+        </button>
+      </div>
+
+      <!-- Affirmations Tab -->
+      <section id="affirmations-tab" class="tab-content active">
+        <div id="affirmationsContainer"></div>
+      </section>
+
+      <!-- Routine Tab -->
+      <section id="routine-tab" class="tab-content">
+        <div class="flex justify-end gap-2 mb-4">
+          <button onclick="expandAll()" class="collapse-btn text-sm">
+            <i class="fas fa-expand mr-1"></i>Expand All
+          </button>
+          <button onclick="collapseAll()" class="collapse-btn text-sm">
+            <i class="fas fa-compress mr-1"></i>Collapse All
+          </button>
+        </div>
+        <div id="routineContainer"></div>
+      </section>
+
+      <!-- Badges Tab -->
+      <section id="badges-tab" class="tab-content">
+        <div class="card mb-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Achievement Badges</h3>
+            <div class="text-sm text-gray-400">
+              <span id="badgeCount">0</span>/<span id="badgeTotal">15</span>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
+            id="badgeContainer"
+          ></div>
+        </div>
+      </section>
+
+      <!-- Insights Tab -->
+      <section id="insights-tab" class="tab-content">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="card">
+            <h3 class="font-bold mb-3">Weekly Completion</h3>
+            <div id="weeklyChart" class="space-y-2"></div>
+          </div>
+          <div class="card">
+            <h3 class="font-bold mb-3">Phase Performance</h3>
+            <div id="phaseStats" class="space-y-3"></div>
+          </div>
+          <div class="card md:col-span-2">
+            <h3 class="font-bold mb-3">Daily Notes</h3>
+            <textarea
+              id="notes"
+              class="w-full h-32 bg-gray-900/50 border border-gray-700 rounded-lg p-3 text-sm resize-none focus:outline-none focus:border-amber-500"
+              placeholder="Reflections, insights, wins..."
+            ></textarea>
+            <button
+              onclick="saveNotes()"
+              class="mt-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700"
+            >
+              <i class="fas fa-save mr-2"></i>Save Notes
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Floating Action Button -->
+    <div class="fab" onclick="toggleQuickActions()">
+      <i class="fas fa-bolt"></i>
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div class="quick-actions" id="quickActions">
+      <h4 class="font-bold mb-3 text-sm">Quick Actions</h4>
+      <div class="space-y-2">
+        <button
+          onclick="markCurrentPhase()"
+          class="w-full py-2 px-3 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700"
+        >
+          Complete Current Phase
+        </button>
+        <button
+          onclick="showMotivation()"
+          class="w-full py-2 px-3 bg-gray-700 text-white rounded-lg text-sm hover:bg-gray-600"
+        >
+          Need Motivation
+        </button>
+        <button
+          onclick="exportData()"
+          class="w-full py-2 px-3 bg-gray-700 text-white rounded-lg text-sm hover:bg-gray-600"
+        >
+          Export Data
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Data Structure
+      let data = {
+        currentDay: 1,
+        xp: 0,
+        level: 1,
+        days: {},
+        badges: {},
+        collapsedPhases: [],
+      };
+
+      const XP_PER_LEVEL = 100;
+      const XP_AFFIRMATION = 25;
+      const XP_ACTIVITY = 10;
+
+      // Affirmations
+      const affirmations = [
+        {
+          id: "morning",
+          title: "Morning",
+          time: "04:30-06:30",
+          focus: "Knowledge",
+          statements: [
+            "I gain clear knowledge today.",
+            "My mind learns fast and well.",
+            "I act wisely with full focus.",
+          ],
+          color: "#3b82f6",
+          icon: "fa-sun",
+          start: 270,
+          end: 390,
+        },
+        {
+          id: "afternoon",
+          title: "Afternoon",
+          time: "09:00-17:00",
+          focus: "Wealth",
+          statements: [
+            "I attract wealth through my work.",
+            "My efforts grow money and resources.",
+            "I create abundance with steady action.",
+          ],
+          color: "#10b981",
+          icon: "fa-briefcase",
+          start: 540,
+          end: 1020,
+        },
+        {
+          id: "evening",
+          title: "Evening",
+          time: "17:00-18:30",
+          focus: "Power",
+          statements: [
+            "I stay strong and calm today.",
+            "I act with power and control.",
+            "My presence influences with wisdom.",
+          ],
+          color: "#8b5cf6",
+          icon: "fa-moon",
+          start: 1020,
+          end: 1110,
+        },
+        {
+          id: "night",
+          title: "Night",
+          time: "21:00",
+          focus: "Integration",
+          statements: [
+            "I rest with knowledge, wealth, power.",
+            "Clarity, abundance, and strength grow nightly.",
+            "Tomorrow I act wisely and strong.",
+          ],
+          color: "#6366f1",
+          icon: "fa-bed",
+          start: 1260,
+          end: 1439,
+        },
+      ];
+
+      // Activities
+      const activities = [
+        {
+          id: "wake",
+          title: "Wake + Silence",
+          time: "04:30-04:40",
+          phase: "brahma",
+          start: 270,
+          end: 280,
+        },
+        {
+          id: "prayer",
+          title: "Prayer/Mantra",
+          time: "04:40-05:00",
+          phase: "brahma",
+          start: 280,
+          end: 300,
+        },
+        {
+          id: "hydration",
+          title: "Hydration + Cleansing",
+          time: "05:00-05:20",
+          phase: "brahma",
+          start: 300,
+          end: 320,
+        },
+        {
+          id: "prana",
+          title: "Prāṇa + Movement",
+          time: "05:20-05:45",
+          phase: "brahma",
+          start: 320,
+          end: 345,
+        },
+        {
+          id: "coldwater",
+          title: "Cold Water Bath",
+          time: "05:45-06:05",
+          phase: "brahma",
+          start: 345,
+          end: 365,
+        },
+        {
+          id: "sitting",
+          title: "Quiet Sitting",
+          time: "06:05-06:30",
+          phase: "brahma",
+          start: 365,
+          end: 390,
+        },
+        {
+          id: "deepwork",
+          title: "Deep Work Block",
+          time: "06:30-08:30",
+          phase: "saraswati",
+          start: 390,
+          end: 510,
+        },
+        {
+          id: "breakfast",
+          title: "Breakfast + Walk",
+          time: "08:30-09:00",
+          phase: "saraswati",
+          start: 510,
+          end: 540,
+        },
+        {
+          id: "technical",
+          title: "Technical Skills",
+          time: "09:00-12:00",
+          phase: "karma",
+          start: 540,
+          end: 720,
+        },
+        {
+          id: "lunch",
+          title: "Lunch + Walk",
+          time: "12:00-13:00",
+          phase: "karma",
+          start: 720,
+          end: 780,
+        },
+        {
+          id: "project",
+          title: "Project Development",
+          time: "13:00-15:00",
+          phase: "karma",
+          start: 780,
+          end: 900,
+        },
+        {
+          id: "communication",
+          title: "Communication Practice",
+          time: "15:00-17:00",
+          phase: "karma",
+          start: 900,
+          end: 1020,
+        },
+        {
+          id: "peace",
+          title: "Free Peace Hour",
+          time: "17:00-18:30",
+          phase: "sandhya",
+          start: 1020,
+          end: 1110,
+        },
+        {
+          id: "dinner",
+          title: "Light Dinner",
+          time: "18:30-19:15",
+          phase: "ratri",
+          start: 1110,
+          end: 1155,
+        },
+        {
+          id: "reflection",
+          title: "Written Reflection",
+          time: "19:15-19:45",
+          phase: "ratri",
+          start: 1155,
+          end: 1185,
+        },
+        {
+          id: "reading",
+          title: "Quiet Reading",
+          time: "19:45-20:30",
+          phase: "ratri",
+          start: 1185,
+          end: 1230,
+        },
+        {
+          id: "shutdown",
+          title: "Shutdown Ritual",
+          time: "20:30-21:00",
+          phase: "ratri",
+          start: 1230,
+          end: 1260,
+        },
+      ];
+
+      const phases = [
+        {
+          id: "brahma",
+          title: "BRAHMA MUHURTA — Inner Command",
+          color: "#d97706",
+          icon: "fa-sun",
+        },
+        {
+          id: "saraswati",
+          title: "SARASWATI PHASE — Peak Learning",
+          color: "#10b981",
+          icon: "fa-book",
+        },
+        {
+          id: "karma",
+          title: "KARMA YOGA — Execution",
+          color: "#3b82f6",
+          icon: "fa-cogs",
+        },
+        {
+          id: "sandhya",
+          title: "SANDHYA — Peace & Transition",
+          color: "#8b5cf6",
+          icon: "fa-moon",
+        },
+        {
+          id: "ratri",
+          title: "RATRI CHARYA — Closure",
+          color: "#6366f1",
+          icon: "fa-bed",
+        },
+      ];
+
+      // Badges
+      const badges = [
+        {
+          id: "first",
+          name: "First Step",
+          desc: "Complete first affirmation",
+          icon: "🌱",
+          req: () => getTotalAff() >= 1,
+        },
+        {
+          id: "morning_7",
+          name: "Morning Warrior",
+          desc: "7 morning affirmations",
+          icon: "🌅",
+          req: () => getPhaseAff("morning") >= 7,
+        },
+        {
+          id: "week_1",
+          name: "Week Champion",
+          desc: "Complete 7 days",
+          icon: "⭐",
+          req: () => getCompleteDays() >= 7,
+        },
+        {
+          id: "streak_7",
+          name: "Lucky Seven",
+          desc: "7-day streak",
+          icon: "🔥",
+          req: () => data.streak >= 7,
+        },
+        {
+          id: "perfect",
+          name: "Perfect Day",
+          desc: "100% in one day",
+          icon: "💎",
+          req: () => hasPerfectDay(),
+        },
+        {
+          id: "halfway",
+          name: "Halfway Hero",
+          desc: "Reach day 11",
+          icon: "🎯",
+          req: () => data.currentDay >= 11,
+        },
+        {
+          id: "week_2",
+          name: "Fortnight Master",
+          desc: "14 days complete",
+          icon: "🏆",
+          req: () => getCompleteDays() >= 14,
+        },
+        {
+          id: "streak_14",
+          name: "Two Weeks Strong",
+          desc: "14-day streak",
+          icon: "💪",
+          req: () => data.streak >= 14,
+        },
+        {
+          id: "level_5",
+          name: "Rising Star",
+          desc: "Reach level 5",
+          icon: "⭐",
+          req: () => data.level >= 5,
+        },
+        {
+          id: "xp_500",
+          name: "XP Hunter",
+          desc: "Earn 500 XP",
+          icon: "✨",
+          req: () => getTotalXP() >= 500,
+        },
+        {
+          id: "all_phases",
+          name: "Phase Master",
+          desc: "Complete all phases 5 times",
+          icon: "🌟",
+          req: () => allPhasesComplete(5),
+        },
+        {
+          id: "routine_50",
+          name: "Routine King",
+          desc: "50 activities done",
+          icon: "👑",
+          req: () => getTotalActivities() >= 50,
+        },
+        {
+          id: "week_3",
+          name: "Final Push",
+          desc: "Reach day 21",
+          icon: "🚀",
+          req: () => data.currentDay >= 21,
+        },
+        {
+          id: "perfect_week",
+          name: "Perfect Week",
+          desc: "7 perfect days",
+          icon: "💫",
+          req: () => hasPerfectWeek(),
+        },
+        {
+          id: "complete",
+          name: "Discipline Master",
+          desc: "Complete all 21 days",
+          icon: "🧘",
+          req: () => getCompleteDays() >= 21,
+        },
+      ];
+
+      // Quotes
+      const quotes = [
+        "Discipline is the bridge between goals and accomplishment.",
+        "We are what we repeatedly do. Excellence is a habit.",
+        "The pain of discipline is far less than the pain of regret.",
+        "Discipline is choosing between what you want now and what you want most.",
+        "Success is simple disciplines practiced every day.",
+        "Self-discipline begins with mastery of your thoughts.",
+        "Motivation gets you started. Discipline keeps you going.",
+        "Do the hard work, especially when you don't feel like it.",
+      ];
+
+      // Init
+      function init() {
+        loadData();
+        updateClock();
+        renderAll();
+        setInterval(updateClock, 1000);
+        setInterval(checkActiveTime, 60000);
+      }
+
+      function loadData() {
+        const saved = localStorage.getItem("disciplineV2");
+        if (saved) {
+          data = JSON.parse(saved);
+        } else {
+          for (let i = 1; i <= 21; i++) {
+            data.days[i] = {
+              affirmations: {
+                morning: false,
+                afternoon: false,
+                evening: false,
+                night: false,
+              },
+              activities: {},
+              notes: "",
+            };
+            activities.forEach((act) => {
+              data.days[i].activities[act.id] = false;
+            });
+          }
+          saveData();
+        }
+        calculateStreak();
+      }
+
+      function saveData() {
+        localStorage.setItem("disciplineV2", JSON.stringify(data));
+      }
+
+      function calculateStreak() {
+        let streak = 0;
+        for (let i = data.currentDay; i >= 1; i--) {
+          const day = data.days[i];
+          const affComplete = Object.values(day.affirmations).every((a) => a);
+          if (affComplete) streak++;
+          else break;
+        }
+        data.streak = streak;
+      }
+
+      function renderAll() {
+        renderHeatmap();
+        renderAffirmations();
+        renderRoutine();
+        renderBadges();
+        updateDisplay();
+        checkActiveTime();
+      }
+
+      function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, "0");
+        const m = String(now.getMinutes()).padStart(2, "0");
+        document.getElementById("liveClock").textContent = `${h}:${m}`;
+      }
+
+      function checkActiveTime() {
+        const now = new Date();
+        const mins = now.getHours() * 60 + now.getMinutes();
+
+        affirmations.forEach((aff) => {
+          const card = document.querySelector(`#aff-${aff.id}`);
+          if (card) {
+            if (mins >= aff.start && mins <= aff.end) {
+              card.classList.add("active-time");
+            } else {
+              card.classList.remove("active-time");
+            }
+          }
+        });
+
+        activities.forEach((act) => {
+          const item = document.querySelector(`#act-${act.id}`);
+          if (item) {
+            if (mins >= act.start && mins <= act.end) {
+              item.classList.add("active-time");
+            } else {
+              item.classList.remove("active-time");
+            }
+          }
+        });
+      }
+
+      function renderHeatmap() {
+        const container = document.getElementById("heatmap");
+        container.innerHTML = "";
+
+        for (let i = 1; i <= 21; i++) {
+          const day = data.days[i];
+          const affDone = Object.values(day.affirmations).filter(
+            (a) => a
+          ).length;
+          const level = Math.floor((affDone / 4) * 4);
+
+          const div = document.createElement("div");
+          div.className = `heatmap-day level-${level}`;
+          if (i === data.currentDay) div.classList.add("current");
+          div.textContent = i;
+          div.onclick = () => {
+            data.currentDay = i;
+            renderAll();
+          };
+          container.appendChild(div);
+        }
+      }
+
+      function renderAffirmations() {
+        const container = document.getElementById("affirmationsContainer");
+        container.innerHTML = "";
+        const day = data.days[data.currentDay];
+
+        affirmations.forEach((aff) => {
+          const done = day.affirmations[aff.id];
+          const card = document.createElement("div");
+          card.className = "affirmation-card";
+          card.id = `aff-${aff.id}`;
+          card.style.borderLeftColor = aff.color;
+          if (done) card.classList.add("completed");
+
+          card.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background: ${
+                                  aff.color
+                                }20">
+                                    <i class="fas ${
+                                      aff.icon
+                                    } text-xl" style="color: ${aff.color}"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold" style="color: ${
+                                      aff.color
+                                    }">${aff.title} (${aff.time})</h3>
+                                    <p class="text-sm text-gray-400">${
+                                      aff.focus
+                                    } Focus</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 mb-3 ml-2">
+                                ${aff.statements
+                                  .map(
+                                    (s) =>
+                                      `<div class="text-sm leading-relaxed">• ${s}</div>`
+                                  )
+                                  .join("")}
+                            </div>
+                            <div class="text-xs text-gray-400 mt-3">+${XP_AFFIRMATION} XP</div>
+                        </div>
+                        <div class="checkmark ${
+                          done ? "checked" : ""
+                        }" onclick="toggleAffirmation('${aff.id}')">
+                            ${
+                              done
+                                ? '<i class="fas fa-check text-white"></i>'
+                                : ""
+                            }
+                        </div>
+                    </div>
+                `;
+
+          container.appendChild(card);
+        });
+      }
+
+      function renderRoutine() {
+        const container = document.getElementById("routineContainer");
+        container.innerHTML = "";
+        const day = data.days[data.currentDay];
+
+        phases.forEach((phase) => {
+          const phaseActs = activities.filter((a) => a.phase === phase.id);
+          const done = phaseActs.filter((a) => day.activities[a.id]).length;
+          const total = phaseActs.length;
+          const pct = Math.round((done / total) * 100);
+          const isCollapsed = data.collapsedPhases.includes(phase.id);
+
+          const phaseDiv = document.createElement("div");
+          phaseDiv.className = "phase-header";
+          phaseDiv.style.borderLeftColor = phase.color;
+
+          phaseDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-3 cursor-pointer" onclick="togglePhase('${
+                      phase.id
+                    }')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: ${
+                              phase.color
+                            }20">
+                                <i class="fas ${phase.icon}" style="color: ${
+            phase.color
+          }"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold" style="color: ${
+                                  phase.color
+                                }">${phase.title}</h3>
+                                <p class="text-xs text-gray-400">${done}/${total} activities</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <p class="text-sm font-bold" style="color: ${
+                                  phase.color
+                                }">${pct}%</p>
+                            </div>
+                            <i class="fas fa-chevron-${
+                              isCollapsed ? "down" : "up"
+                            } text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="phase-activities ${
+                      isCollapsed ? "collapsed" : ""
+                    }" id="phase-${phase.id}">
+                        ${phaseActs
+                          .map((act) => {
+                            const actDone = day.activities[act.id];
+                            return `
+                                <div class="activity-item ${
+                                  actDone ? "completed" : ""
+                                }" id="act-${act.id}">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3 flex-1">
+                                            <div class="checkmark ${
+                                              actDone ? "checked" : ""
+                                            }" onclick="toggleActivity('${
+                              act.id
+                            }')">
+                                                ${
+                                                  actDone
+                                                    ? '<i class="fas fa-check text-white text-sm"></i>'
+                                                    : ""
+                                                }
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between">
+                                                    <h4 class="font-semibold text-sm">${
+                                                      act.title
+                                                    }</h4>
+                                                    <span class="font-mono text-xs text-amber-400">${
+                                                      act.time
+                                                    }</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                          })
+                          .join("")}
+                    </div>
+                `;
+
+          container.appendChild(phaseDiv);
+        });
+      }
+
+      function renderBadges() {
+        const container = document.getElementById("badgeContainer");
+        container.innerHTML = "";
+        let unlocked = 0;
+
+        badges.forEach((badge) => {
+          const isUnlocked = badge.req();
+          if (isUnlocked) {
+            unlocked++;
+            if (!data.badges[badge.id]) {
+              data.badges[badge.id] = true;
+              showNotification(`🏆 Badge Unlocked: ${badge.name}!`, "success");
+              saveData();
+            }
+          }
+
+          const div = document.createElement("div");
+          div.className = `badge-item ${isUnlocked ? "unlocked" : "locked"}`;
+          div.innerHTML = `
+                    <div class="text-4xl mb-2">${badge.icon}</div>
+                    <div class="text-xs font-bold">${badge.name}</div>
+                    <div class="text-xs text-gray-400 mt-1">${badge.desc}</div>
+                `;
+          container.appendChild(div);
+        });
+
+        document.getElementById("badgeCount").textContent = unlocked;
+        document.getElementById("badgeTotal").textContent = badges.length;
+      }
+
+      function updateDisplay() {
+        const day = data.days[data.currentDay];
+        const affDone = Object.values(day.affirmations).filter((a) => a).length;
+        const pct = Math.round((affDone / 4) * 100);
+
+        // Rings
+        const circumferences = [754, 628, 502, 377];
+        const rings = ["ring1", "ring2", "ring3", "ring4"];
+        const affKeys = ["morning", "afternoon", "evening", "night"];
+
+        rings.forEach((ringId, i) => {
+          const ring = document.getElementById(ringId);
+          const done = day.affirmations[affKeys[i]];
+          ring.style.strokeDashoffset = done ? 0 : circumferences[i];
+        });
+
+        document.getElementById("ringPercent").textContent = `${pct}%`;
+        document.getElementById("currentDayNum").textContent = data.currentDay;
+        document.getElementById("streakNum").textContent = data.streak;
+
+        const journeyPct = Math.round(((data.currentDay - 1) / 20) * 100);
+        document.getElementById(
+          "progressPercent"
+        ).textContent = `${journeyPct}%`;
+        document.getElementById("journeyBar").style.width = `${journeyPct}%`;
+
+        // XP & Level
+        const level = Math.floor(data.xp / XP_PER_LEVEL) + 1;
+        data.level = level;
+        const xpInLevel = data.xp % XP_PER_LEVEL;
+        const xpPct = (xpInLevel / XP_PER_LEVEL) * 100;
+
+        document.getElementById("currentXP").textContent = xpInLevel;
+        document.getElementById("xpNeeded").textContent = XP_PER_LEVEL;
+        document.getElementById("xpFill").style.width = `${xpPct}%`;
+
+        const levelNames = [
+          "Beginner",
+          "Apprentice",
+          "Practitioner",
+          "Adept",
+          "Master",
+          "Guru",
+        ];
+        const levelName =
+          levelNames[Math.min(level - 1, levelNames.length - 1)];
+        document.getElementById(
+          "levelDisplay"
+        ).innerHTML = `<span>Lv ${level}</span><span class="text-xs">${levelName}</span>`;
+
+        // Insights
+        renderInsights();
+
+        // Load notes
+        document.getElementById("notes").value = day.notes || "";
+      }
+
+      function renderInsights() {
+        // Weekly chart
+        const weeklyDiv = document.getElementById("weeklyChart");
+        if (weeklyDiv) {
+          weeklyDiv.innerHTML = "";
+          for (
+            let i = Math.max(1, data.currentDay - 6);
+            i <= data.currentDay;
+            i++
+          ) {
+            const day = data.days[i];
+            const affDone = Object.values(day.affirmations).filter(
+              (a) => a
+            ).length;
+            const pct = (affDone / 4) * 100;
+
+            const bar = document.createElement("div");
+            bar.className = "flex items-center gap-2";
+            bar.innerHTML = `
+                        <div class="text-xs w-12 text-gray-400">Day ${i}</div>
+                        <div class="flex-1 h-6 bg-gray-800 rounded overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-amber-500 to-orange-600" style="width: ${pct}%"></div>
+                        </div>
+                        <div class="text-xs w-12 text-right font-bold text-amber-500">${Math.round(
+                          pct
+                        )}%</div>
+                    `;
+            weeklyDiv.appendChild(bar);
+          }
+        }
+
+        // Phase stats
+        const phaseDiv = document.getElementById("phaseStats");
+        if (phaseDiv) {
+          phaseDiv.innerHTML = "";
+          affirmations.forEach((aff) => {
+            const total = getPhaseAff(aff.id);
+            const pct = Math.round((total / data.currentDay) * 100);
+
+            const stat = document.createElement("div");
+            stat.innerHTML = `
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm">${aff.title}</span>
+                            <span class="text-xs font-bold" style="color: ${aff.color}">${total}/${data.currentDay}</span>
+                        </div>
+                        <div class="h-2 bg-gray-800 rounded overflow-hidden">
+                            <div class="h-full" style="width: ${pct}%; background: ${aff.color}"></div>
+                        </div>
+                    `;
+            phaseDiv.appendChild(stat);
+          });
+        }
+      }
+
+      function toggleAffirmation(id) {
+        const day = data.days[data.currentDay];
+        day.affirmations[id] = !day.affirmations[id];
+
+        if (day.affirmations[id]) {
+          data.xp += XP_AFFIRMATION;
+          confetti();
+          playSound();
+        } else {
+          data.xp = Math.max(0, data.xp - XP_AFFIRMATION);
+        }
+
+        calculateStreak();
+        saveData();
+        renderAll();
+      }
+
+      function toggleActivity(id) {
+        const day = data.days[data.currentDay];
+        day.activities[id] = !day.activities[id];
+
+        if (day.activities[id]) {
+          data.xp += XP_ACTIVITY;
+        } else {
+          data.xp = Math.max(0, data.xp - XP_ACTIVITY);
+        }
+
+        saveData();
+        renderAll();
+      }
+
+      function completeDay() {
+        const day = data.days[data.currentDay];
+        Object.keys(day.affirmations).forEach(
+          (k) => (day.affirmations[k] = true)
+        );
+        Object.keys(day.activities).forEach((k) => (day.activities[k] = true));
+        data.xp += XP_AFFIRMATION * 4 + XP_ACTIVITY * activities.length;
+
+        saveData();
+        calculateStreak();
+        majorCelebration();
+        showNotification("🎉 Day completed! Amazing work!", "success");
+
+        setTimeout(() => {
+          if (data.currentDay < 21) {
+            data.currentDay++;
+            saveData();
+            renderAll();
+          }
+        }, 2000);
+      }
+
+      function togglePhase(id) {
+        const idx = data.collapsedPhases.indexOf(id);
+        if (idx > -1) {
+          data.collapsedPhases.splice(idx, 1);
+        } else {
+          data.collapsedPhases.push(id);
+        }
+        saveData();
+        renderRoutine();
+      }
+
+      function expandAll() {
+        data.collapsedPhases = [];
+        saveData();
+        renderRoutine();
+      }
+
+      function collapseAll() {
+        data.collapsedPhases = phases.map((p) => p.id);
+        saveData();
+        renderRoutine();
+      }
+
+      function saveNotes() {
+        const notes = document.getElementById("notes").value;
+        data.days[data.currentDay].notes = notes;
+        saveData();
+        showNotification("✅ Notes saved", "success");
+      }
+
+      function switchTab(tab) {
+        document
+          .querySelectorAll(".tab-button")
+          .forEach((b) => b.classList.remove("active"));
+        event.target.classList.add("active");
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => c.classList.remove("active"));
+        document.getElementById(`${tab}-tab`).classList.add("active");
+      }
+
+      function toggleQuickActions() {
+        document.getElementById("quickActions").classList.toggle("active");
+      }
+
+      function markCurrentPhase() {
+        const now = new Date();
+        const mins = now.getHours() * 60 + now.getMinutes();
+        const aff = affirmations.find((a) => mins >= a.start && mins <= a.end);
+        if (aff) {
+          toggleAffirmation(aff.id);
+          showNotification(`✅ ${aff.title} phase marked complete!`, "success");
+        } else {
+          showNotification("⏰ No active phase right now", "info");
+        }
+        toggleQuickActions();
+      }
+
+      function showMotivation() {
+        const quote = quotes[Math.floor(Math.random() * quotes.length)];
+        showNotification(`💪 ${quote}`, "info");
+        toggleQuickActions();
+      }
+
+      function exportData() {
+        const dataStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `discipline-data-${
+          new Date().toISOString().split("T")[0]
+        }.json`;
+        a.click();
+        showNotification("📥 Data exported!", "success");
+        toggleQuickActions();
+      }
+
+      function confetti() {
+        for (let i = 0; i < 30; i++) {
+          const c = document.createElement("div");
+          c.className = "confetti";
+          c.style.left = Math.random() * 100 + "vw";
+          c.style.animationDelay = Math.random() * 0.5 + "s";
+          c.style.background = [
+            "#d97706",
+            "#f59e0b",
+            "#10b981",
+            "#3b82f6",
+            "#8b5cf6",
+          ][Math.floor(Math.random() * 5)];
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 3000);
+        }
+      }
+
+      function majorCelebration() {
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => confetti(), i * 200);
+        }
+      }
+
+      function playSound() {
+        // Could add actual audio
+      }
+
+      function showNotification(msg, type) {
+        const notif = document.createElement("div");
+        notif.className = "notification";
+        const colors = {
+          success: "bg-green-900/30 border-green-500",
+          info: "bg-blue-900/30 border-blue-500",
+          warning: "bg-amber-900/30 border-amber-500",
+        };
+        notif.className += " " + colors[type] + " border-l-4";
+        notif.innerHTML = `<div class="flex items-center"><i class="fas fa-info-circle mr-3"></i><span>${msg}</span></div>`;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 4000);
+      }
+
+      // Helper functions
+      function getTotalAff() {
+        let total = 0;
+        for (let i = 1; i <= 21; i++) {
+          total += Object.values(data.days[i].affirmations).filter(
+            (a) => a
+          ).length;
+        }
+        return total;
+      }
+
+      function getPhaseAff(phase) {
+        let total = 0;
+        for (let i = 1; i <= 21; i++) {
+          if (data.days[i].affirmations[phase]) total++;
+        }
+        return total;
+      }
+
+      function getCompleteDays() {
+        let total = 0;
+        for (let i = 1; i <= 21; i++) {
+          if (Object.values(data.days[i].affirmations).every((a) => a)) total++;
+        }
+        return total;
+      }
+
+      function hasPerfectDay() {
+        for (let i = 1; i <= 21; i++) {
+          if (Object.values(data.days[i].affirmations).every((a) => a))
+            return true;
+        }
+        return false;
+      }
+
+      function hasPerfectWeek() {
+        let count = 0;
+        for (let i = 1; i <= 21; i++) {
+          if (Object.values(data.days[i].affirmations).every((a) => a)) {
+            count++;
+            if (count >= 7) return true;
+          } else {
+            count = 0;
+          }
+        }
+        return false;
+      }
+
+      function getTotalXP() {
+        return data.xp;
+      }
+
+      function getTotalActivities() {
+        let total = 0;
+        for (let i = 1; i <= 21; i++) {
+          total += Object.values(data.days[i].activities).filter(
+            (a) => a
+          ).length;
+        }
+        return total;
+      }
+
+      function allPhasesComplete(n) {
+        return affirmations.every((aff) => getPhaseAff(aff.id) >= n);
+      }
+
+      // Initialize on load
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
